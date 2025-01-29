@@ -2,7 +2,9 @@ CC = clang
 
 CFLAGS = -Wall -Wextra -Werror
 
-SRCS = md5.c
+SRCS = src/ft_ssl.c src/md5.c
+
+HEADERS = src/md5.h
 
 OBJS = $(SRCS:.c=.o)
 
@@ -13,7 +15,7 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) -o $(NAME) $^
 
-%.o: %.c
+%.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
@@ -24,4 +26,8 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+test: all
+	openssl  md5 Makefile Makefile
+	./ft_ssl md5 Makefile Makefile
+
+.PHONY: all clean fclean re test
