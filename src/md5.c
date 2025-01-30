@@ -42,10 +42,10 @@ static uint32_t * md5_final(uint32_t *h)
 
 uint32_t * md5(char * input) {
 
-    uint32_t h0 = a0;
-    uint32_t h1 = a1;
-    uint32_t h2 = a2;
-    uint32_t h3 = a3;
+    uint32_t a0 = h0;
+    uint32_t b0 = h1;
+    uint32_t c0 = h2;
+    uint32_t d0 = h3;
 
    // process the message in successive 512-bit chunks
     for (uint64_t i = 0; i < strlen(input); i += 64)
@@ -53,10 +53,10 @@ uint32_t * md5(char * input) {
         // break chunk into sixteen 32-bit words
         uint32_t * w = (uint32_t*)(input + i);
 
-        uint32_t a = h0;
-        uint32_t b = h1;
-        uint32_t c = h2;
-        uint32_t d = h3;
+        uint32_t a = a0;
+        uint32_t b = b0;
+        uint32_t c = c0;
+        uint32_t d = d0;
 
         // loop over each 32-bit word
         for (uint8_t j = 0; j < 64; j++) {
@@ -88,13 +88,13 @@ uint32_t * md5(char * input) {
             a = temp;
         }
 
-        h0 += a;
-        h1 += b;
-        h2 += c;
-        h3 += d;
+        a0 += a;
+        b0 += b;
+        c0 += c;
+        d0 += d;
     }
 
     // reverse the byte order of each 32-bit word
-    uint32_t h[4] = { h0, h1, h2, h3 };
+    uint32_t h[4] = { a0, b0, c0, d0 };
     return md5_final(h);
 }
