@@ -2,9 +2,9 @@ CC = clang
 
 CFLAGS = -Wall -Wextra -Werror
 
-SRCS = src/ft_ssl.c src/md5.c
+SRCS = src/ft_ssl.c src/md5.c src/sha256.c
 
-HEADERS = src/md5.h
+HEADERS = src/md5.h src/sha256.h
 
 OBJS = $(SRCS:.c=.o)
 
@@ -26,8 +26,4 @@ fclean: clean
 
 re: fclean all
 
-test: all
-	openssl  md5 Makefile Makefile
-	./ft_ssl md5 Makefile Makefile
-
-.PHONY: all clean fclean re test
+.PHONY: all clean fclean re

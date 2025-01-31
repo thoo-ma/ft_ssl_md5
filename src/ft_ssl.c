@@ -5,6 +5,7 @@
 #include <getopt.h>
 
 #include "md5.h"
+#include "sha256.h"
 
 void print_usage(const char *prog_name) {
     fprintf(stderr, "Usage: %s [md5|sha256] [-p] [-q] [-r] [-s] [file...]\n", prog_name);
@@ -45,7 +46,6 @@ int main(int ac, char ** av) {
 
     // After getopt, optind points to the first non-option argument
     const char *hash_type = av[optind++]; // increment to skip the hash type
-    printf("Hash type: %s\n", hash_type);
 
     if (optind < ac) {
         for (int i = optind; i < ac; i++) {
@@ -75,23 +75,61 @@ int main(int ac, char ** av) {
 
             fclose(file);
 
-            // Padding the input
-            char * padded_input = md5_padding(input);
-            if (!padded_input) {
-                printf("Error: memory allocation failed\n");
+            uint64_t padded_len = 0;
+            if (!strcmp(hash_type, "md5")) {
+                // Padding the input
+                char * padded_input = md5_padding(input, file_size, &padded_len);
+                if (!padded_input) {
+                    printf("Error: memory allocation failed\n");
+                    free(input);
+                    return EXIT_FAILURE;
+                }
+                uint32_t * h = md5(padded_input, padded_len);
+                printf("MD5(%s)= %08x%08x%08x%08x\n", av[i], h[0], h[1], h[2], h[3]);
                 free(input);
-                return EXIT_FAILURE;
+                free(padded_input);
+            } else {
+                // Padding the input
+                uint8_t * padded_input = sha256_padding(input);
+                if (!padded_input) {
+                    printf("Error: memory allocation failed\n");
+                    free(input);
+                    return EXIT_FAILURE;
+                }
+                uint32_t * h = sha256(padded_input);
+                printf("SHA256(%s)= %08x%08x%08x%08x%08x%08x%08x%08x\n", av[i], h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]);
+                free(input);
+                free(padded_input);
             }
-
-            // printf("input = %s\n", padded_input);
-            uint32_t * h = md5(padded_input);
-            printf("MD5(%s)= %08x%08x%08x%08x\n", av[i], h[0], h[1], h[2], h[3]);
-            free(input);
-            free(padded_input);
         }
     } else {
-        print_usage(av[0]);
-        return EXIT_FAILURE;
+        // Read from standard input
+        char input[4096];
+        size_t input_len = fread(input, 1, sizeof(input) - 1, stdin);
+        input[input_len] = '\0';
+
+        // Padding the input
+        uint64_t padded_len2 = 0;
+        uint32_t * h;
+        if (!strcmp(hash_type, "md5")) {
+            char * padded_input = md5_padding(input, input_len, &padded_len2);
+            if (!padded_input) {
+                printf("Error: memory allocation failed\n");
+                return EXIT_FAILURE;
+            }
+            h = md5(padded_input, padded_len2);
+            printf("(stdin)= %08x%08x%08x%08x\n",  h[0], h[1], h[2], h[3]);
+            free(padded_input);
+        } else {
+            uint8_t * padded_input = sha256_padding(input);
+            if (!padded_input) {
+                printf("Error: memory allocation failed\n");
+                return EXIT_FAILURE;
+            }
+            uint32_t * h = sha256(padded_input);
+            printf("(stdin)= %08x%08x%08x%08x%08x%08x%08x%08x\n", h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]);
+            free(padded_input);
+        }
     }
 
     return EXIT_SUCCESS;
