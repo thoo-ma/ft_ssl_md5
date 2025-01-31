@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -Werror
 
 SRCS = src/ft_ssl.c src/md5.c src/sha256.c
 
-HEADERS = src/md5.h src/sha256.h
+HEADERS = src/ft_ssl.h src/md5.h src/sha256.h
 
 OBJS = $(SRCS:.c=.o)
 

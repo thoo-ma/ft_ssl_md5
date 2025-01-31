@@ -4,7 +4,6 @@
 
 #include "md5.h"
 
-// Pads the input message according to the MD5 specification.
 char * md5_padding(const char * input, uint64_t input_len, uint64_t *padded_len)
 {
     uint64_t output_len = ((input_len + 8) / 64 + 1) * 64 - 8;
