@@ -121,24 +121,24 @@ int main(int ac, char ** av) {
     while ((opt = getopt(ac, av, "pqrs")) != -1) {
         switch (opt) {
             case 'p':
-                context.options |= OPTION_P;
+                SET_OPTION_P(context.options);
                 printf("Option -p\n");
                 break;
             case 'q':
-                context.options |= OPTION_Q;
+                SET_OPTION_Q(context.options);
                 printf("Option -q\n");
                 break;
             case 'r':
-                context.options |= OPTION_R;
+                SET_OPTION_R(context.options);
                 printf("Option -r\n");
                 break;
             case 's':
-                context.options |= OPTION_S;
+                SET_OPTION_S(context.options);
                 printf("Option -s\n");
                 break;
             default:
-                printf("No option\n");
-                break;
+                print_usage(av[0]);
+                return EXIT_FAILURE;
         }
     }
 

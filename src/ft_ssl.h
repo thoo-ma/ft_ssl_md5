@@ -5,10 +5,10 @@
 #define OPTION_R (1 << 2) // 00000100
 #define OPTION_S (1 << 3) // 00001000
 
-// #define SET_OPTION_P(options) (options |= OPTION_P)
-// #define SET_OPTION_Q(options) (options |= OPTION_Q)
-// #define SET_OPTION_R(options) (options |= OPTION_R)
-// #define SET_OPTION_S(options) (options |= OPTION_S)
+#define SET_OPTION_P(options) (options |= OPTION_P)
+#define SET_OPTION_Q(options) (options |= OPTION_Q)
+#define SET_OPTION_R(options) (options |= OPTION_R)
+#define SET_OPTION_S(options) (options |= OPTION_S)
 
 typedef struct {
     ENTRY entry;        // constant per execution
