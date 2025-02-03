@@ -16,11 +16,13 @@
 #define UNSET_OPTION_S(options) (options &= ~OPTION_S)
 
 typedef struct {
-    ENTRY entry;        // constant per execution
-    uint8_t options;    // constant per execution
-    char * filename;    // null or mutable per execution
-    char * message;     // null or mutable per execution
-    long message_len;   // null or mutable per execution (uint64_t)
+    ENTRY entry;            // constant per execution
+    uint8_t options;        // constant per execution
+    char * filename;        // null or mutable per execution
+    char * message;         // null or mutable per execution
+    long message_len;       // null or mutable per execution (uint64_t)
+    uint32_t hash[8];       // mutable per execution
+    uint8_t words_number;   // constant per execution
 } ft_ssl_context_t;
 
 typedef char * hash_type_t;

@@ -58,7 +58,7 @@ run_test_error() {
 run_md5_tests() {
 
     # NOTE: cases with equivalent in openssl
-    no options
+    # no options
     run_test_files md5 readme
     run_test_stdin md5 '42 is nice'
 

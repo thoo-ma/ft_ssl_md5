@@ -34,12 +34,11 @@ char * md5_padding(const char * input, uint64_t input_len, uint64_t *padded_len)
 // Reverses the byte order of each 32-bit word in the hash.
 static uint32_t * md5_final(uint32_t *h)
 {
-    static uint32_t result[4];
     for (int i = 0; i < 4; i++) {
-        result[i] = ((h[i] & 0xff) << 24) | ((h[i] & 0xff00) << 8) |
-                    ((h[i] & 0xff0000) >> 8) | ((h[i] & 0xff000000) >> 24);
+        h[i] = ((h[i] & 0xff) << 24) | ((h[i] & 0xff00) << 8) |
+               ((h[i] & 0xff0000) >> 8) | ((h[i] & 0xff000000) >> 24);
     }
-    return result;
+    return h;
 }
 
 uint32_t * md5(const char * input, uint64_t length) {
@@ -97,6 +96,5 @@ uint32_t * md5(const char * input, uint64_t length) {
     }
 
     // reverse the byte order of each 32-bit word
-    uint32_t h[4] = { a0, b0, c0, d0 };
-    return md5_final(h);
+    return md5_final((uint32_t[4]){ a0, b0, c0, d0 });
 }

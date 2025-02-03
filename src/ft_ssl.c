@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
@@ -8,26 +9,71 @@
 #include "sha256.h"
 #include "ft_ssl.h"
 
-void print_usage(const char *prog_name) {
-    fprintf(stderr, "Usage: %s [md5|sha256] [-p] [-q] [-r] [-s] [file...]\n", prog_name);
+// static void print_context(ft_ssl_context_t * context) {
+//     printf("hash type: %s\n", context->entry.key);
+//     printf("options: %d\n", context->options);
+//     printf("filename: %s\n", context->filename);
+//     printf("message length: %ld\n", context->message_len);
+//     printf("words number: %d\n", context->words_number);
+// }
+
+static void to_uppercase(const char *src, char *dest, size_t size) {
+    for (size_t i = 0; i < size - 1 && src[i] != '\0'; i++)
+        dest[i] = toupper((unsigned char) src[i]);
+    dest[size - 1] = '\0';
 }
 
-void print_missing_argument(const char *prog_name) {
+static void print_usage(const char *prog_name) {
+    fprintf(stderr, "Usage: %s [md5|sha256] [-p] [-q] [-r] [-s string] [file...]\n", prog_name);
+}
+
+static void print_missing_argument(const char *prog_name) {
     fprintf(stderr, "%s: option -s requires an argument\n", prog_name);
 }
 
-int exit_error(void (*f)(const char *), const char *prog_name) {
+static int exit_error(void (*f)(const char *), const char *prog_name) {
     f(prog_name);
     return EXIT_FAILURE;
+}
+
+static void print_hash(ft_ssl_context_t * context) {
+    for (size_t i = 0; i < context->words_number; i++)
+        printf("%08x", context->hash[i]);
+}
+
+static void ft_ssl_print(ft_ssl_context_t *context) {
+
+    // 7 cause the longest hash type is "sha256"
+    char algo_name[7] = {0};
+    to_uppercase(context->entry.key, algo_name, 7);
+
+    if (context->options & OPTION_Q) {
+        print_hash(context);
+        printf("\n");
+    } else if (context->options & OPTION_R) {
+        print_hash(context);
+        context->filename
+        ? printf(" *%s\n", context->filename)
+        : printf(" *stdin\n");
+    } else if (context->filename) {
+        printf("%s(%s)= ", context->entry.key, context->filename);
+        print_hash(context);
+        printf("\n");
+    } else if (context->options & OPTION_P) {
+        printf("(\"%s\")= ", context->message);
+        print_hash(context);
+        printf("\n");
+    } else {
+        printf("(stdin)= ");
+        print_hash(context);
+        printf("\n");
+    }
 }
 
 void do_md5(ft_ssl_context_t * context) {
 
     // DEBUG
-    // printf("hash type: %s\n", context->entry.key);
-    // printf("options: %d\n", context->options);
-    // printf("filename: %s\n", context->filename);
-    // printf("message length: %ld\n", context->message_len);
+    // print_context(context);
 
     // 1. pad
     uint64_t padded_len = 0;
@@ -39,33 +85,19 @@ void do_md5(ft_ssl_context_t * context) {
     }
 
     // 2. hash
-    uint32_t * h = md5(padded_message, padded_len);
+    memcpy(context->hash, md5(padded_message, padded_len), context->words_number * sizeof(uint32_t));
 
     // 3. print
-    if (context->options & OPTION_Q) {
-        printf("%08x%08x%08x%08x\n", h[0], h[1], h[2], h[3]);
-    } else if (context->options & OPTION_R) {
-        context->filename
-        ? printf("%08x%08x%08x%08x *%s\n", h[0], h[1], h[2], h[3], context->filename)
-        : printf("%08x%08x%08x%08x *stdin\n", h[0], h[1], h[2], h[3]);
-    } else if (context->filename) {
-        printf("MD5(%s)= %08x%08x%08x%08x\n", context->filename, h[0], h[1], h[2], h[3]);
-    } else if (context->options & OPTION_P) {
-        printf("(\"%s\")= %08x%08x%08x%08x\n", context->message, h[0], h[1], h[2], h[3]);
-    } else {
-        printf("(stdin)= %08x%08x%08x%08x\n", h[0], h[1], h[2], h[3]);
-    }
+    ft_ssl_print(context);
 
+    // 4. free
     free(padded_message);
 }
 
 void do_sha256(ft_ssl_context_t * context) {
 
     // DEBUG
-    // printf("hash type: %s\n", context->entry.key);
-    // printf("options: %d\n", context->options);
-    // printf("filename: %s\n", context->filename);
-    // printf("message length: %ld\n", context->message_len);
+    // print_context(context);
 
     // 1. pad
     uint8_t * padded_message = sha256_padding(context->message);
@@ -76,23 +108,12 @@ void do_sha256(ft_ssl_context_t * context) {
     }
 
     // 2. hash
-    uint32_t * h = sha256(padded_message);
+    memcpy(context->hash, sha256(padded_message), context->words_number * sizeof(uint32_t));
 
     // 3. print
-    if (context->options & OPTION_Q) {
-        printf("%08x%08x%08x%08x%08x%08x%08x%08x\n", h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]);
-    } else if (context->options & OPTION_R) {
-        context->filename
-        ? printf("%08x%08x%08x%08x%08x%08x%08x%08x *%s\n", h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7], context->filename)
-        : printf("%08x%08x%08x%08x%08x%08x%08x%08x *stdin\n", h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]);
-    } else if (context->filename) {
-        printf("SHA256(%s)= %08x%08x%08x%08x%08x%08x%08x%08x\n", context->filename, h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]);
-    } else if (context->options & OPTION_P) {
-        printf("(\"%s\")= %08x%08x%08x%08x%08x%08x%08x%08x\n", context->message, h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]);
-    } else {
-        printf("(stdin)= %08x%08x%08x%08x%08x%08x%08x%08x\n", h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]);
-    }
+    ft_ssl_print(context);
 
+    // 4. free
     free(padded_message);
 }
 
@@ -127,7 +148,9 @@ int main(int ac, char ** av) {
         .options = 0,
         .filename = NULL,
         .message = NULL,
-        .message_len = 0
+        .message_len = 0,
+        .hash = {0},
+        .words_number = !strcmp(item_found->key, "md5") ? 4 : 8
     };
 
     // Parse the options
