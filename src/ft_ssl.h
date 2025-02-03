@@ -10,6 +10,11 @@
 #define SET_OPTION_R(options) (options |= OPTION_R)
 #define SET_OPTION_S(options) (options |= OPTION_S)
 
+#define UNSET_OPTION_P(options) (options &= ~OPTION_P)
+#define UNSET_OPTION_Q(options) (options &= ~OPTION_Q)
+#define UNSET_OPTION_R(options) (options &= ~OPTION_R)
+#define UNSET_OPTION_S(options) (options &= ~OPTION_S)
+
 typedef struct {
     ENTRY entry;        // constant per execution
     uint8_t options;    // constant per execution
