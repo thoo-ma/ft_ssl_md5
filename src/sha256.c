@@ -26,7 +26,7 @@ uint8_t * sha256_padding(char * input)
     // append the original length in bits at the end in big-endian order
     uint64_t bit_len = 8 * input_len;
     for (int i = 0; i < 8; i++)
-        output[output_len + i] = (bit_len >> (56 - 8 * i)) & 0xFF;
+        output[(int)output_len + i] = (bit_len >> (56 - 8 * i)) & 0xFF;
 
     return output;
 }
@@ -50,7 +50,7 @@ uint32_t * sha256(uint8_t * input) {
         uint32_t w[64] = {0};
 
         for (uint8_t j = 0; j < 16; j++)
-            w[j] = (input[i + j * 4] << 24) | (input[i + j * 4 + 1] << 16) | (input[i + j * 4 + 2] << 8) | (input[i + j * 4 + 3]);
+            w[j] = (uint32_t)(input[i + j * 4] << 24) | (uint32_t)(input[i + j * 4 + 1] << 16) | (uint32_t)(input[i + j * 4 + 2] << 8) | (uint32_t)(input[i + j * 4 + 3]);
 
         for (uint8_t j = 16; j < 64; j++)
             w[j] = SSIG1(w[j - 2]) + w[j - 7] + SSIG0(w[j - 15]) + w[j - 16];

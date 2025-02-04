@@ -1,6 +1,6 @@
 CC = clang
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -Wconversion
 
 SRCS = src/ft_ssl.c src/md5.c src/sha256.c
 

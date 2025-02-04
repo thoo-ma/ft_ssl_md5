@@ -19,7 +19,7 @@
 
 static void to_uppercase(const char *src, char *dest, size_t size) {
     for (size_t i = 0; i < size - 1 && src[i] != '\0'; i++)
-        dest[i] = toupper((unsigned char) src[i]);
+        dest[i] = (char)toupper((unsigned char) src[i]);
     dest[size - 1] = '\0';
 }
 
@@ -77,7 +77,7 @@ void do_md5(ft_ssl_context_t * context) {
 
     // 1. pad
     uint64_t padded_len = 0;
-    char * padded_message = md5_padding(context->message, context->message_len, &padded_len);
+    char * padded_message = md5_padding(context->message, (uint64_t)context->message_len, &padded_len);
     if (!padded_message) {
         printf("Error: memory allocation failed\n");
         free(context->message);
@@ -124,7 +124,7 @@ int main(int ac, char ** av) {
 
     // Initialize the hash table
     int table_size = 2;
-    if (hcreate(table_size) == 0)
+    if (hcreate((size_t)table_size) == 0)
         return exit_error(perror, "hcreate");
 
     // Insert key-function pointer pairs into the hash table
@@ -170,7 +170,7 @@ int main(int ac, char ** av) {
                 SET_OPTION_S(context.options);
                 if (optind < ac) {
                     context.message = strdup(av[optind]);
-                    context.message_len = strlen(context.message);
+                    context.message_len = (long)strlen(context.message);
                     optind++;
                 } else return exit_error(print_missing_argument, av[0]);
                 break;
@@ -215,7 +215,7 @@ int main(int ac, char ** av) {
             fseek(file, 0, SEEK_SET);
 
             // Allocate memory for the file content
-            context.message = malloc(context.message_len + 1);
+            context.message = malloc((size_t)context.message_len + 1);
             if (!context.message) {
                 perror("malloc");
                 fclose(file);
@@ -224,7 +224,7 @@ int main(int ac, char ** av) {
 
             /// @todo read by chunks
             // Read the file content into the buffer
-            fread(context.message, 1, context.message_len, file);
+            fread(context.message, 1, (size_t)context.message_len, file);
             context.message[context.message_len] = '\0';
             fclose(file);
 
@@ -244,11 +244,8 @@ int main(int ac, char ** av) {
             return exit_error(perror, "malloc");
 
         // Read from standard input to the buffer
-        size_t message_len = fread(context.message, 1, buffer_size, stdin);
-        context.message[message_len] = '\0';
-
-        /// @todo cast
-        context.message_len = (long)message_len;
+        context.message_len = (long)fread(context.message, 1, buffer_size, stdin);
+        context.message[context.message_len] = '\0';
 
         // Call the hash function
         ((hash_function_t)context.entry.data)(&context);
