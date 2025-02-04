@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <getopt.h>
 
 #include "md5.h"
@@ -154,7 +155,7 @@ int main(int ac, char ** av) {
     };
 
     // Parse the options
-    int opt;
+    int opt, s_message;
     while ((opt = getopt(ac, av, "pqrs")) != -1) {
         switch (opt) {
             case 'p':
@@ -168,20 +169,43 @@ int main(int ac, char ** av) {
                 break;
             case 's':
                 SET_OPTION_S(context.options);
-                if (optind < ac) {
-                    context.message = strdup(av[optind]);
-                    context.message_len = (long)strlen(context.message);
-                    optind++;
-                } else return exit_error(print_missing_argument, av[0]);
+                s_message = optind;
+                if (optind >= ac)
+                    return exit_error(print_missing_argument, av[0]);
                 break;
             default: return exit_error(print_usage, av[0]);
         }
     }
 
-    if (context.options & OPTION_S) {
+    if (!isatty(fileno(stdin))) {
+        printf("stdin is not a tty\n");
+
+        // Allocate a buffer for the message
+        size_t buffer_size = 4096;
+        context.message = malloc(buffer_size + 1);
+        if (!context.message)
+            return exit_error(perror, "malloc");
+
+        // Read from stdin to the buffer
+        context.message_len = (long)fread(context.message, 1, buffer_size, stdin);
+        context.message[context.message_len] = '\0';
+
+        // Call the hash function
+        ((hash_function_t)context.entry.data)(&context);
+
+        free(context.message);
+        context.message = NULL;
+        context.message_len = 0;
+    }
+
+    if (IS_OPTION_S(context.options)) {
 
         // Always print message with -s option
         SET_OPTION_P(context.options);
+
+        context.message = strdup(av[s_message]);
+        context.message_len = (long)strlen(context.message);
+        optind++;
 
         // Call the hash function for the -s option
         ((hash_function_t)context.entry.data)(&context);
@@ -234,23 +258,6 @@ int main(int ac, char ** av) {
             free(context.message);
             context.message = NULL;
         }
-    } else {
-
-        /// @todo
-        // Allocate a buffer for the message
-        size_t buffer_size = 4096;
-        context.message = malloc(buffer_size + 1);
-        if (!context.message)
-            return exit_error(perror, "malloc");
-
-        // Read from standard input to the buffer
-        context.message_len = (long)fread(context.message, 1, buffer_size, stdin);
-        context.message[context.message_len] = '\0';
-
-        // Call the hash function
-        ((hash_function_t)context.entry.data)(&context);
-
-        free(context.message);
     }
 
     return EXIT_SUCCESS;
