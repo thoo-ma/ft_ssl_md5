@@ -10,13 +10,19 @@
 #include "sha256.h"
 #include "ft_ssl.h"
 
-// static void print_context(ft_ssl_context_t * context) {
-//     printf("hash type: %s\n", context->entry.key);
-//     printf("options: %d\n", context->options);
-//     printf("filename: %s\n", context->filename);
-//     printf("message length: %ld\n", context->message_len);
-//     printf("words number: %d\n", context->words_number);
-// }
+const hash_type_t hash_types[] = { "md5", "sha256" };
+
+const hash_function_t hash_functions[] = { md5, sha256 };
+
+static void __attribute__((unused)) print_context(ft_ssl_context_t * context) {
+    printf("hash type: %s\n", context->entry.key);
+    printf("options: %d\n", context->options);
+    printf("filename: %s\n", context->filename);
+    printf("message length: %ld\n", context->message_len);
+    printf("words number: %d\n", context->words_number);
+    printf("message chunk length: %ld\n", context->message_chunk_len);
+    printf("message chunk: %s\n", (char *)context->message_chunk);
+}
 
 static void to_uppercase(const char *src, char *dest, size_t size) {
     for (size_t i = 0; i < size - 1 && src[i] != '\0'; i++)
@@ -44,6 +50,8 @@ static void print_hash(ft_ssl_context_t * context) {
 
 static void ft_ssl_print(ft_ssl_context_t *context) {
 
+    /// @todo do uppercase in place (only used once)
+    /// @todo set this number dynamically
     // 7 cause the longest hash type is "sha256"
     char algo_name[7] = {0};
     to_uppercase(context->entry.key, algo_name, 7);
@@ -57,11 +65,13 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
         ? printf(" *%s\n", context->filename)
         : printf(" *stdin\n");
     } else if (context->filename) {
-        printf("%s(%s)= ", context->entry.key, context->filename);
+        // printf("%s(%s)= ", context->entry.key, context->filename);
+        printf("%s(%s)= ", algo_name, context->filename);
         print_hash(context);
         printf("\n");
     } else if (context->options & OPTION_P) {
-        printf("(\"%s\")= ", context->message);
+        if (context->p_message)
+            printf("(\"%s\")= ", *context->p_message);
         print_hash(context);
         printf("\n");
     } else {
@@ -71,51 +81,112 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
     }
 }
 
-void do_md5(ft_ssl_context_t * context) {
+void sha256(ft_ssl_context_t * context, FILE * file) {
 
-    // DEBUG
-    // print_context(context);
+    // init sha256 state
+    context->hash[0] = 0x6a09e667;
+    context->hash[1] = 0xbb67ae85;
+    context->hash[2] = 0x3c6ef372;
+    context->hash[3] = 0xa54ff53a;
+    context->hash[4] = 0x510e527f;
+    context->hash[5] = 0x9b05688c;
+    context->hash[6] = 0x1f83d9ab;
+    context->hash[7] = 0x5be0cd19;
 
-    // 1. pad
-    uint64_t padded_len = 0;
-    char * padded_message = md5_padding(context->message, (uint64_t)context->message_len, &padded_len);
-    if (!padded_message) {
-        printf("Error: memory allocation failed\n");
-        free(context->message);
-        exit(EXIT_FAILURE);
+    if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+        write(1, "(\"", 2);
+
+    size_t read_bytes = 0;
+    while ((read_bytes = fread(context->message_chunk, 1, CHUNK_SIZE_READ, file)) > 0) {
+        context->message_chunk_len = read_bytes;
+        context->message_len += read_bytes;
+
+        if (read_bytes < CHUNK_SIZE_READ) {
+            // last chunk -> do final padding
+            sha256_padding(context->message_chunk, &context->message_chunk_len, context->message_len);
+            sha256_update(context->message_chunk, context->message_chunk_len, context->hash);
+        } else {
+            // check if there's more data to read
+            if (fgetc(file) == EOF) {
+                // last chunk -> do final padding
+                sha256_padding(context->message_chunk, &context->message_chunk_len, context->message_len);
+                sha256_update(context->message_chunk, context->message_chunk_len, context->hash);
+            } else {
+                // not the last chunk -> no padding, just hash
+                fseek(file, -1, SEEK_CUR);
+                sha256_update(context->message_chunk, context->message_chunk_len, context->hash);
+            }
+        }
+
+        if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+            write(1, context->message_chunk, read_bytes);
     }
 
-    // 2. hash
-    memcpy(context->hash, md5(padded_message, padded_len), context->words_number * sizeof(uint32_t));
+    /// @todo
+    // handle empty stream
+    if (context->message_len == 0) {
+        printf("empty stream\n");
+        ((hash_function_t)context->entry.data)(context, file);
+    }
 
-    // 3. print
+    if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+        write(1, "\")= ", 4);
+
     ft_ssl_print(context);
-
-    // 4. free
-    free(padded_message);
 }
 
-void do_sha256(ft_ssl_context_t * context) {
+void md5(ft_ssl_context_t * context, FILE * file) {
 
-    // DEBUG
-    // print_context(context);
+    // init md5 state
+    context->hash[0] = 0x67452301;
+    context->hash[1] = 0xEFCDAB89;
+    context->hash[2] = 0x98BADCFE;
+    context->hash[3] = 0x10325476;
 
-    // 1. pad
-    uint8_t * padded_message = sha256_padding(context->message);
-    if (!padded_message) {
-        printf("Error: memory allocation failed\n");
-        free(context->message);
-        exit(EXIT_FAILURE);
+    if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+        write(1, "(\"", 2);
+
+    size_t read_bytes = 0;
+    while ((read_bytes = fread(context->message_chunk, 1, CHUNK_SIZE_READ, file)) > 0) {
+        context->message_chunk_len = read_bytes;
+        context->message_len += read_bytes;
+
+        if (read_bytes < CHUNK_SIZE_READ) {
+            // last chunk -> do final padding
+            md5_padding(context->message_chunk, &context->message_chunk_len, context->message_len);
+            md5_update(context->message_chunk, context->message_chunk_len, context->hash);
+
+        } else {
+            // check if there's more data to read
+            if (fgetc(file) == EOF) {
+                // last chunk -> do final padding
+                md5_padding(context->message_chunk, &context->message_chunk_len, context->message_len);
+                md5_update(context->message_chunk, context->message_chunk_len, context->hash);
+            } else {
+                // not the last chunk -> no padding, just hash
+                fseek(file, -1, SEEK_CUR);
+                md5_update(context->message_chunk, context->message_chunk_len, context->hash);
+            }
+        }
+
+        if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+            write(1, context->message_chunk, read_bytes);
     }
 
-    // 2. hash
-    memcpy(context->hash, sha256(padded_message), context->words_number * sizeof(uint32_t));
+    /// @todo
+    // handle empty stream
+    if (context->message_len == 0) {
+        printf("empty stream\n");
+        ((hash_function_t)context->entry.data)(context, file);
+    }
 
-    // 3. print
+    if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+        write(1, "\")= ", 4);
+
+    /// @todo
+    memcpy(context->hash, md5_final(context->hash), context->words_number * sizeof(uint32_t));
+
     ft_ssl_print(context);
-
-    // 4. free
-    free(padded_message);
 }
 
 int main(int ac, char ** av) {
@@ -151,7 +222,9 @@ int main(int ac, char ** av) {
         .message = NULL,
         .message_len = 0,
         .hash = {0},
-        .words_number = !strcmp(item_found->key, "md5") ? 4 : 8
+        .words_number = !strcmp(item_found->key, "md5") ? 4 : 8, /// @todo
+        .message_chunk = {0},
+        .message_chunk_len = 0,
     };
 
     // Parse the options
@@ -177,53 +250,47 @@ int main(int ac, char ** av) {
         }
     }
 
+    // Read from stdin
     if (!isatty(fileno(stdin))) {
-        printf("stdin is not a tty\n");
-
-        // Allocate a buffer for the message
-        size_t buffer_size = 4096;
-        context.message = malloc(buffer_size + 1);
-        if (!context.message)
-            return exit_error(perror, "malloc");
-
-        // Read from stdin to the buffer
-        context.message_len = (long)fread(context.message, 1, buffer_size, stdin);
-        context.message[context.message_len] = '\0';
-
-        // Call the hash function
-        ((hash_function_t)context.entry.data)(&context);
-
-        free(context.message);
-        context.message = NULL;
-        context.message_len = 0;
+        ((hash_function_t)context.entry.data)(&context, stdin);
     }
 
+    // Read from string
     if (IS_OPTION_S(context.options)) {
 
-        // Always print message with -s option
+        // Setup the context
         SET_OPTION_P(context.options);
+        context.p_message = &av[s_message];
 
-        context.message = strdup(av[s_message]);
-        context.message_len = (long)strlen(context.message);
-        optind++;
+        // Open from memory
+        FILE *file = fmemopen((void *)av[s_message], strlen(av[s_message]), "rb");
+        if (!file)
+            exit_error(perror, "fmemopen");
 
-        // Call the hash function for the -s option
-        ((hash_function_t)context.entry.data)(&context);
-        free(context.message);
+        // Hash the message
+        ((hash_function_t)context.entry.data)(&context, file);
 
-        // Exit if no additional files are provided
-        if (++optind >= ac)
+        // Close the file stream
+        fclose(file);
+
+        optind += 2;
+        if (optind >= ac)
             return EXIT_SUCCESS;
         else {
             optind--;
-            context.message = NULL;
+            context.message = NULL; // TODO: delete
             context.message_len = 0;
             UNSET_OPTION_P(context.options);
         }
     }
 
+    // Read from file
     if (++optind < ac) {
         for (int i = optind; i < ac; i++) {
+
+            // Setup the context
+            context.message_len = 0;
+            context.filename = av[i];
 
             // Open from file
             FILE *file = fopen(av[i], "rb");
@@ -231,32 +298,12 @@ int main(int ac, char ** av) {
                 perror(av[i]);
                 continue;
             }
-            context.filename = av[i];
 
-            // Determine the file size
-            fseek(file, 0, SEEK_END);
-            context.message_len = ftell(file);
-            fseek(file, 0, SEEK_SET);
+            // Hash the message
+            ((hash_function_t)context.entry.data)(&context, file);
 
-            // Allocate memory for the file content
-            context.message = malloc((size_t)context.message_len + 1);
-            if (!context.message) {
-                perror("malloc");
-                fclose(file);
-                continue;
-            }
-
-            /// @todo read by chunks
-            // Read the file content into the buffer
-            fread(context.message, 1, (size_t)context.message_len, file);
-            context.message[context.message_len] = '\0';
+            // Close the file stream
             fclose(file);
-
-            // Call the hash function
-            ((hash_function_t)context.entry.data)(&context);
-
-            free(context.message);
-            context.message = NULL;
         }
     }
 

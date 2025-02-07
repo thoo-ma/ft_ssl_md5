@@ -1,3 +1,6 @@
+#pragma once
+
+#include <stdio.h>
 #include <search.h>
 
 #define OPTION_P (1 << 0) // 00000001
@@ -20,21 +23,59 @@
 #define IS_OPTION_R(options) (options & OPTION_R)
 #define IS_OPTION_S(options) (options & OPTION_S)
 
+/// @brief The size of a block in bytes (64 bytes = 512 bits)
+#define BLOCK_SIZE 64
+
+/// @brief The number of 512 bits blocks in a chunk
+#define CHUNK_NUMBERS 10
+
+/// @brief The number of 512 bits blocks read at a time
+#define CHUNK_SIZE_READ (BLOCK_SIZE * CHUNK_NUMBERS)
+
+/// @brief The total number of 512 bits blocks in a chunk (one extra for padding)
+#define CHUNK_SIZE_TOTAL (CHUNK_SIZE_READ + BLOCK_SIZE)
+
 typedef struct {
-    ENTRY entry;            // constant per execution
-    uint8_t options;        // constant per execution
-    char * filename;        // null or mutable per execution
-    char * message;         // null or mutable per execution
-    long message_len;       // null or mutable per execution (uint64_t)
-    uint32_t hash[8];       // mutable per execution
-    uint8_t words_number;   // constant per execution
+
+    /// @note constant per execution;
+    ENTRY entry;
+
+    /// @note constant per execution;
+    uint8_t options;
+
+    /// @note null or mutable per execution
+    char * filename;
+
+    // null or mutable per execution
+    char * message;
+
+    char ** p_message;
+
+    /// @brief The length of the message.
+    /// @note null or mutable per execution (uint64_t)
+    long message_len;
+
+    /// @brief The hash value.
+    /// @note constant per execution
+    uint32_t hash[8];
+
+    /// @brief The number of 32-bit words in the hash.
+    /// @note constant per execution
+    uint8_t words_number;
+
+    /// @note mutable per execution;
+    uint8_t message_chunk[CHUNK_SIZE_TOTAL];
+
+    /// @note mutable per execution;
+    size_t message_chunk_len;
+
 } ft_ssl_context_t;
 
 typedef char * hash_type_t;
-typedef void (*hash_function_t)(ft_ssl_context_t *);
+typedef void (*hash_function_t)(ft_ssl_context_t *, FILE * file);
 
-void do_md5(ft_ssl_context_t *);
-void do_sha256(ft_ssl_context_t *);
+void md5(ft_ssl_context_t *, FILE * file);
+void sha256(ft_ssl_context_t *, FILE * file);
 
-const hash_type_t hash_types[] = { "md5", "sha256" }; // possible values for ENTRY key
-const hash_function_t hash_functions[] = { do_md5, do_sha256 }; // possible values for ENTRY data
+extern const hash_type_t hash_types[]; // possible values for ENTRY key
+extern const hash_function_t hash_functions[]; // possible values for ENTRY data

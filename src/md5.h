@@ -1,5 +1,9 @@
+#pragma once
+
 #include <stdint.h>
 #include <stdlib.h>
+
+#include "ft_ssl.h" // for CHUNK_SIZE_TOTAL
 
 #define ROTATE_LEFT(x, n) ((x << n) | (x >> (32 - n)))
 
@@ -44,15 +48,7 @@ static const md5_context_t md5_context = {
     }
 };
 
-/// @brief Pads the input message according to the MD5 specification.
-/// @param input The input message to be padded.
-/// @param input_len The length of the input message.
-/// @param padded_len Pointer to store the length of the padded message.
-/// @return The padded message.
-char * md5_padding(const char *input, uint64_t input_len, uint64_t *padded_len);
 
-/// @brief Computes the MD5 hash of the input message.
-/// @param input The input message.
-/// @param length The length of the input message.
-/// @return The MD5 hash as an array of 4 32-bit words.
-uint32_t * md5(const char *input, uint64_t length);
+void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t  * chunk_len, long message_len);
+void md5_update(uint8_t *input, uint64_t length, uint32_t * hash);
+uint32_t * md5_final(uint32_t *h);

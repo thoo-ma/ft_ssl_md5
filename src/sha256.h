@@ -1,4 +1,8 @@
+#pragma once
+
 #include <stdint.h>
+
+#include "ft_ssl.h" // for CHUNK_SIZE_TOTAL
 
 #define ROTATE_RIGHT(x, n) ((x >> n) | (x << (32 - n)))
 
@@ -43,5 +47,5 @@ static sha256_context_t sha256_context = {
     }
 };
 
-uint8_t * sha256_padding(char *);
-uint32_t * sha256(uint8_t *);
+void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t  * chunk_len, long message_len);
+void sha256_update(uint8_t * input, size_t input_len, uint32_t * hash);

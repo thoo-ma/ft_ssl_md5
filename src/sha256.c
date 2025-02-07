@@ -1,50 +1,63 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+// #include <stdio.h> // DEBUG
+// #include <unistd.h> // DEBUG
 
 #include "sha256.h"
+#include "ft_ssl.h"
 
-// Pads the input message according to the SHA256MD5 specification.
-uint8_t * sha256_padding(char * input)
+void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_len, long message_len)
 {
-    uint64_t input_len = strlen(input);
-    uint64_t output_len = ((input_len + 8) / 64 + 1) * 64 - 8;
-    uint8_t *output = (uint8_t*)malloc(output_len + 8);
+    // DEBUG
+    // fprintf(stderr, "GO pad\n");
 
-    if (!output)
-        return NULL;
+    // end the '1' bit
+    chunk[*chunk_len] = 0x80;
 
-    // append the message
-    memcpy(output, input, input_len);
+    // DEBUG
+    // fprintf(stderr, "chunk_len: %lu\n", *chunk_len);
+    // fprintf(stderr, "message_len: %lu\n", message_len);
 
-    // append the '1' bit
-    output[input_len] = 0x80;
+    // append '0' bits to the last 512 bits block of the chunk
+    size_t block_index = (*chunk_len + 1) / 64;
+    size_t zeros = 64 * (block_index + 1) - *chunk_len - 1 - 8;
 
-    // append '0' bits
-    memset(output + input_len + 1, 0, output_len - input_len - 1);
+    // DEBUG
+    // fprintf(stderr, "block_index: %lu\n", block_index);
+    // fprintf(stderr, "zeros: %lu\n", zeros);
 
-    // append the original length in bits at the end in big-endian order
-    uint64_t bit_len = 8 * input_len;
+    memset(chunk + *chunk_len + 1, 0, zeros);
+
+    // DEBUG
+    // write(2, chunk, *chunk_len);
+    // write(2, "\n", 1);
+
+    // append the original length in bits
+    uint64_t bit_len = (uint64_t)message_len * 8;
     for (int i = 0; i < 8; i++)
-        output[(int)output_len + i] = (bit_len >> (56 - 8 * i)) & 0xFF;
+        chunk[*chunk_len + 1 + zeros + (unsigned long)i] = (bit_len >> (56 - 8 * i)) & 0xFF;
 
-    return output;
+    *chunk_len = 64 * (block_index + 1);
+
+    // DEBUG
+    // fprintf(stderr, "__ chunk_len: %lu\n", *chunk_len);
 }
 
-uint32_t * sha256(uint8_t * input) {
+void sha256_update(uint8_t * input, size_t input_len, uint32_t * hash) {
 
-    // initialize the hash values
-    uint32_t a0 = sha256_context.h0;
-    uint32_t b0 = sha256_context.h1;
-    uint32_t c0 = sha256_context.h2;
-    uint32_t d0 = sha256_context.h3;
-    uint32_t e0 = sha256_context.h4;
-    uint32_t f0 = sha256_context.h5;
-    uint32_t g0 = sha256_context.h6;
-    uint32_t h0 = sha256_context.h7;
+    // Load the state
+    uint32_t a0 = hash[0];
+    uint32_t b0 = hash[1];
+    uint32_t c0 = hash[2];
+    uint32_t d0 = hash[3];
+    uint32_t e0 = hash[4];
+    uint32_t f0 = hash[5];
+    uint32_t g0 = hash[6];
+    uint32_t h0 = hash[7];
 
     // process the message in successive 512-bit chunks
-    for (uint64_t i = 0; i < strlen((char *)input); i += 64) {
+    for (uint64_t i = 0; i < input_len; i += 64) {
 
         // 1. prepare the message schedule
         uint32_t w[64] = {0};
@@ -92,5 +105,13 @@ uint32_t * sha256(uint8_t * input) {
         h0 += h;
     }
 
-    return ((uint32_t[]){a0, b0, c0, d0, e0, f0, g0, h0});
+    // Update the state
+    hash[0] = a0;
+    hash[1] = b0;
+    hash[2] = c0;
+    hash[3] = d0;
+    hash[4] = e0;
+    hash[5] = f0;
+    hash[6] = g0;
+    hash[7] = h0;
 }

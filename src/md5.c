@@ -1,38 +1,53 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h> // DEBUG
+#include <unistd.h> // DEBUG
+
+/// @todo rename `chunk_len` into `chunk_size`
+/// @todo rename `message_len` into message_size_total`
 
 #include "md5.h"
+#include "ft_ssl.h"
 
-char * md5_padding(const char * input, uint64_t input_len, uint64_t *padded_len)
+void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_len, long message_len)
 {
-    uint64_t output_len = ((input_len + 8) / 64 + 1) * 64 - 8;
-    uint8_t *output = (uint8_t*)malloc(output_len + 8);
+    // DEBUG
+    // fprintf(stderr, "GO pad\n");
 
-    if (!output)
-        return NULL;
+    // end the '1' bit
+    chunk[*chunk_len] = 0x80;
 
-    // append the message
-    memcpy(output, input, input_len);
+    // DEBUG
+    // fprintf(stderr, "chunk_len: %lu\n", *chunk_len);
+    // fprintf(stderr, "message_len: %lu\n", message_len);
 
-    // append the '1' bit
-    output[input_len] = 0x80;
+    // append '0' bits to the last 512 bits block of the chunk
+    size_t block_index = (*chunk_len + 1) / 64;
+    size_t zeros = 64 * (block_index + 1) - *chunk_len - 1 - 8;
 
-    // append '0' bits
-    memset(output + input_len + 1, 0, output_len - input_len - 1);
+    // DEBUG
+    // fprintf(stderr, "block_index: %lu\n", block_index);
+    // fprintf(stderr, "zeros: %lu\n", zeros);
 
-    // append the original length in bits at the end
-    memcpy(output + output_len, &(uint64_t){8 * input_len}, 8);
+    memset(chunk + *chunk_len + 1, 0, zeros);
 
-    if (padded_len) {
-        *padded_len = output_len + 8;
-    }
+    // DEBUG
+    // write(2, chunk, *chunk_len);
+    // write(2, "\n", 1);
 
-    return (char *)output;
+    // append the original length in bits
+    uint64_t bit_len = (uint64_t)message_len * 8;
+    memcpy(chunk + *chunk_len + 1 + zeros, &bit_len, 8);
+
+    *chunk_len = 64 * (block_index + 1);
+
+    // DEBUG
+    // fprintf(stderr, "__ chunk_len: %lu\n", *chunk_len);
 }
 
 // Reverses the byte order of each 32-bit word in the hash.
-static uint32_t * md5_final(uint32_t *h)
+uint32_t * md5_final(uint32_t *h)
 {
     for (int i = 0; i < 4; i++) {
         h[i] = ((h[i] & 0xff) << 24) | ((h[i] & 0xff00) << 8) |
@@ -41,14 +56,15 @@ static uint32_t * md5_final(uint32_t *h)
     return h;
 }
 
-uint32_t * md5(const char * input, uint64_t length) {
+void md5_update(uint8_t * input, uint64_t length, uint32_t * hash) {
 
-    uint32_t a0 = md5_context.h0;
-    uint32_t b0 = md5_context.h1;
-    uint32_t c0 = md5_context.h2;
-    uint32_t d0 = md5_context.h3;
+    // initialize the hash values
+    uint32_t a0 = hash[0];
+    uint32_t b0 = hash[1];
+    uint32_t c0 = hash[2];
+    uint32_t d0 = hash[3];
 
-   // process the message in successive 512-bit chunks
+    // process the message in successive 512-bit chunks
     for (uint64_t i = 0; i < length; i += 64)
     {
         // break chunk into sixteen 32-bit words
@@ -95,6 +111,8 @@ uint32_t * md5(const char * input, uint64_t length) {
         d0 += d;
     }
 
-    // reverse the byte order of each 32-bit word
-    return md5_final((uint32_t[4]){ a0, b0, c0, d0 });
+    hash[0] = a0;
+    hash[1] = b0;
+    hash[2] = c0;
+    hash[3] = d0;
 }
