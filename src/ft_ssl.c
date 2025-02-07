@@ -20,8 +20,8 @@ static void __attribute__((unused)) print_context(ft_ssl_context_t * context) {
     printf("filename: %s\n", context->filename);
     printf("message size: %ld\n", context->message_size);
     printf("words number: %d\n", context->words_number);
-    printf("message chunk size: %ld\n", context->message_chunk_size);
-    printf("message chunk: %s\n", (char *)context->message_chunk);
+    printf("chunk size: %ld\n", context->chunk_size);
+    printf("chunk: %s\n", (char *)context->chunk);
 }
 
 static void to_uppercase(const char *src, char *dest, size_t size) {
@@ -99,40 +99,40 @@ void sha256(ft_ssl_context_t * context, FILE * file) {
     size_t read_bytes = 0;
     int was_full_chunk = 0;
 
-    while ((read_bytes = fread(context->message_chunk, 1, CHUNK_SIZE_READ, file)) > 0) {
-        context->message_chunk_size = read_bytes;
+    while ((read_bytes = fread(context->chunk, 1, CHUNK_SIZE_READ, file)) > 0) {
+        context->chunk_size = read_bytes;
         context->message_size += read_bytes;
         was_full_chunk = (read_bytes == CHUNK_SIZE_READ);
 
         if (read_bytes < CHUNK_SIZE_READ) {
             // last chunk -> do final padding
-            sha256_padding(context->message_chunk, &context->message_chunk_size, context->message_size);
-            sha256_update(context->message_chunk, context->message_chunk_size, context->hash);
+            sha256_padding(context->chunk, &context->chunk_size, context->message_size);
+            sha256_update(context->chunk, context->chunk_size, context->hash);
         } else {
             // If reading from stdin, just process the chunk
             if (file == stdin) {
-                sha256_update(context->message_chunk, context->message_chunk_size, context->hash);
+                sha256_update(context->chunk, context->chunk_size, context->hash);
             } else {
                 // For regular files, we can safely check for EOF
                 if (fgetc(file) == EOF) {
-                    sha256_padding(context->message_chunk, &context->message_chunk_size, context->message_size);
-                    sha256_update(context->message_chunk, context->message_chunk_size, context->hash);
+                    sha256_padding(context->chunk, &context->chunk_size, context->message_size);
+                    sha256_update(context->chunk, context->chunk_size, context->hash);
                 } else {
                     fseek(file, -1, SEEK_CUR);
-                    sha256_update(context->message_chunk, context->message_chunk_size, context->hash);
+                    sha256_update(context->chunk, context->chunk_size, context->hash);
                 }
             }
         }
 
         if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
-            write(1, context->message_chunk, read_bytes);
+            write(1, context->chunk, read_bytes);
     }
 
     // Handle empty stream or final padding for stdin
     if (context->message_size == 0 || (file == stdin && was_full_chunk)) {
-        context->message_chunk_size = 0;
-        sha256_padding(context->message_chunk, &context->message_chunk_size, context->message_size);
-        sha256_update(context->message_chunk, context->message_chunk_size, context->hash);
+        context->chunk_size = 0;
+        sha256_padding(context->chunk, &context->chunk_size, context->message_size);
+        sha256_update(context->chunk, context->chunk_size, context->hash);
     }
 
     if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
@@ -155,40 +155,40 @@ void md5(ft_ssl_context_t * context, FILE * file) {
     size_t read_bytes = 0;
     int was_full_chunk = 0;
 
-    while ((read_bytes = fread(context->message_chunk, 1, CHUNK_SIZE_READ, file)) > 0) {
-        context->message_chunk_size = read_bytes;
+    while ((read_bytes = fread(context->chunk, 1, CHUNK_SIZE_READ, file)) > 0) {
+        context->chunk_size = read_bytes;
         context->message_size += read_bytes;
         was_full_chunk = (read_bytes == CHUNK_SIZE_READ);
 
         if (read_bytes < CHUNK_SIZE_READ) {
             // last chunk -> do final padding
-            md5_padding(context->message_chunk, &context->message_chunk_size, context->message_size);
-            md5_update(context->message_chunk, context->message_chunk_size, context->hash);
+            md5_padding(context->chunk, &context->chunk_size, context->message_size);
+            md5_update(context->chunk, context->chunk_size, context->hash);
         } else {
             // If reading from stdin, just process the chunk
             if (file == stdin) {
-                md5_update(context->message_chunk, context->message_chunk_size, context->hash);
+                md5_update(context->chunk, context->chunk_size, context->hash);
             } else {
                 // For regular files, we can safely check for EOF
                 if (fgetc(file) == EOF) {
-                    md5_padding(context->message_chunk, &context->message_chunk_size, context->message_size);
-                    md5_update(context->message_chunk, context->message_chunk_size, context->hash);
+                    md5_padding(context->chunk, &context->chunk_size, context->message_size);
+                    md5_update(context->chunk, context->chunk_size, context->hash);
                 } else {
                     fseek(file, -1, SEEK_CUR);
-                    md5_update(context->message_chunk, context->message_chunk_size, context->hash);
+                    md5_update(context->chunk, context->chunk_size, context->hash);
                 }
             }
         }
 
         if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
-            write(1, context->message_chunk, read_bytes);
+            write(1, context->chunk, read_bytes);
     }
 
     // Handle empty stream or final padding for stdin
     if (context->message_size == 0 || (file == stdin && was_full_chunk)) {
-        context->message_chunk_size = 0;
-        md5_padding(context->message_chunk, &context->message_chunk_size, context->message_size);
-        md5_update(context->message_chunk, context->message_chunk_size, context->hash);
+        context->chunk_size = 0;
+        md5_padding(context->chunk, &context->chunk_size, context->message_size);
+        md5_update(context->chunk, context->chunk_size, context->hash);
     }
 
     if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
@@ -235,8 +235,8 @@ int main(int ac, char ** av) {
         .message_size = 0,
         .hash = {0},
         .words_number = !strcmp(item_found->key, "md5") ? 4 : 8, /// @todo
-        .message_chunk = {0},
-        .message_chunk_size = 0,
+        .chunk = {0},
+        .chunk_size = 0,
     };
 
     // Parse the options
