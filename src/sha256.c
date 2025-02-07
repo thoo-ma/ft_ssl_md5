@@ -44,7 +44,7 @@ void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t
     // fprintf(stderr, "__ chunk_size: %lu\n", *chunk_size);
 }
 
-void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t size, uint32_t hash[8]) {
+void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t hash[8]) {
 
     // Load the state
     uint32_t a0 = hash[0];
@@ -57,7 +57,7 @@ void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t size, uint32_t hash[8
     uint32_t h0 = hash[7];
 
     // process the message in successive 512-bit chunks
-    for (size_t i = 0; i < size; i += 64) {
+    for (size_t i = 0; i < chunk_size; i += 64) {
 
         // 1. prepare the message schedule
         uint32_t w[64] = {0};

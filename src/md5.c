@@ -56,7 +56,7 @@ void md5_final(uint32_t hash[4])
               ((hash[3] & 0xff0000) >> 8) | ((hash[3] & 0xff000000) >> 24);
 }
 
-void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t size, uint32_t hash[4]) {
+void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t hash[4]) {
 
     // initialize the hash values
     uint32_t a0 = hash[0];
@@ -65,7 +65,7 @@ void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t size, uint32_t hash[4]) 
     uint32_t d0 = hash[3];
 
     // process the message in successive 512-bit chunks
-    for (size_t i = 0; i < size; i += 64)
+    for (size_t i = 0; i < chunk_size; i += 64)
     {
         // break chunk into sixteen 32-bit words
         uint32_t * w = (uint32_t*)(chunk + i);
