@@ -285,12 +285,7 @@ int main(int ac, char ** av) {
         // Close the file stream
         fclose(file);
 
-        if (optind >= ac)
-            return EXIT_SUCCESS;
-        else {
-            context.message_len = 0;
-            UNSET_OPTION_P(context.options);
-        }
+        UNSET_OPTION_P(context.options);
     }
 
     // Read from file
