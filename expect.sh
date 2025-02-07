@@ -37,9 +37,9 @@ proc run_file_tests {algorithm test_files} {
 
         # Compare the outputs
         if { $output eq $expected } {
-            send_user "File test passed for $filename ($algorithm): Output matches openssl ✅\n"
+            send_user "File test passed for $filename ($algorithm) ✅\n"
         } else {
-            send_user "File test failed for $filename ($algorithm): Output does not match openssl ❌\n"
+            send_user "File test failed for $filename ($algorithm) ❌\n"
             send_user "Expected: '$expected'\n"
             send_user "Got:      '$output'\n"
         }
@@ -68,11 +68,32 @@ proc run_stdin_tests {algorithm test_files} {
 
         # Compare the outputs
         if { $output eq $expected } {
-            send_user "Stdin test passed for $filename ($algorithm): Output matches openssl ✅\n"
+            send_user "Stdin test passed for $filename ($algorithm) ✅\n"
         } else {
-            send_user "Stdin test failed for $filename ($algorithm): Output does not match openssl ❌\n"
+            send_user "Stdin test failed for $filename ($algorithm) ❌\n"
             send_user "Expected: '$expected'\n"
             send_user "Got:      '$output'\n"
+        }
+    }
+}
+
+# Function to run -r option test cases
+proc run_r_option_tests {algorithm test_files} {
+    send_user "\n=== Testing the -r option ===\n"
+    foreach filename $test_files {
+        log_user 0
+        spawn openssl $algorithm -r $filename
+        expect eof
+        set expected [string trim $expect_out(buffer)]
+        spawn ./ft_ssl $algorithm -r $filename
+        expect eof
+        set output [string trim $expect_out(buffer)]
+        log_user 1
+        if { $output eq $expected } {
+            send_user -- "-r option test passed for $filename ($algorithm) ✅\n"
+        } else {
+            send_user -- "-r option test failed for $filename ($algorithm) ❌\n"
+            send_user "Expected: '$expected_r'\nGot:      '$output'\n"
         }
     }
 }
@@ -87,3 +108,4 @@ set algorithm [lindex $argv 0]
 # Run both test modes
 run_file_tests $algorithm $test_files
 run_stdin_tests $algorithm $test_files
+run_r_option_tests $algorithm $test_files
