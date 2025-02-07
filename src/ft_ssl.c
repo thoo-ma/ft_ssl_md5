@@ -201,7 +201,7 @@ void md5(ft_ssl_context_t * context, FILE * file) {
 
 int main(int ac, char ** av) {
 
-    if (ac < 2)
+    if (ac < 3)
         return exit_error(print_usage, av[0]);
 
     // Initialize the hash table
