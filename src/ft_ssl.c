@@ -71,7 +71,7 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
         printf("\n");
     } else if (context->options & OPTION_P) {
         if (context->p_message)
-            printf("(\"%s\")= ", *context->p_message);
+            printf("(\"%s\")= ", context->p_message);
         print_hash(context);
         printf("\n");
     } else {
@@ -237,8 +237,8 @@ int main(int ac, char ** av) {
     };
 
     // Parse the options
-    int opt, s_message;
-    while ((opt = getopt(ac, av, "pqrs")) != -1) {
+    int opt;
+    while ((opt = getopt(ac, av, "pqrs:")) != -1) {
         switch (opt) {
             case 'p':
                 SET_OPTION_P(context.options);
@@ -251,9 +251,9 @@ int main(int ac, char ** av) {
                 break;
             case 's':
                 SET_OPTION_S(context.options);
-                s_message = optind;
-                if (optind >= ac)
+                if (!optarg)
                     return exit_error(print_missing_argument, av[0]);
+                context.p_message = optarg;
                 break;
             default: return exit_error(print_usage, av[0]);
         }
@@ -269,10 +269,9 @@ int main(int ac, char ** av) {
 
         // Setup the context
         SET_OPTION_P(context.options);
-        context.p_message = &av[s_message];
 
         // Open from memory
-        FILE *file = fmemopen((void *)av[s_message], strlen(av[s_message]), "rb");
+        FILE *file = fmemopen((void *)context.p_message, strlen(context.p_message), "rb");
         if (!file)
             exit_error(perror, "fmemopen");
 

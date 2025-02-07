@@ -46,7 +46,7 @@ typedef struct {
     /// @note null or mutable per execution
     char * filename;
 
-    char ** p_message;
+    char * p_message;
 
     /// @brief The length of the message.
     /// @note null or mutable per execution (uint64_t)
