@@ -108,6 +108,39 @@ proc run_r_option_tests {algorithm test_files} {
     }
 }
 
+proc run_multiple_files_test {algorithm test_files} {
+    send_user "\n=== Testing multiple files input ===\n"
+
+    # Take first 3 files from test_files for multiple file test
+    set files_to_test [lrange $test_files 0 2]
+    set files_string [join $files_to_test " "]
+
+    # Disable logging of spawn output
+    log_user 0
+
+    # Get openssl hash for multiple files
+    spawn openssl $algorithm {*}$files_to_test
+    expect eof
+    set expected [string trim $expect_out(buffer)]
+
+    # Get ft_ssl hash for multiple files
+    spawn ./ft_ssl $algorithm {*}$files_to_test
+    expect eof
+    set output [string trim $expect_out(buffer)]
+
+    # Re-enable logging
+    log_user 1
+
+    # Compare the outputs
+    if { $output eq $expected } {
+        send_user "Multiple files test passed ($algorithm) ✅\n"
+    } else {
+        send_user "Multiple files test failed ($algorithm) ❌\n"
+        send_user "Expected:\n'$expected'\n"
+        send_user "Got:\n'$output'\n"
+    }
+}
+
 # Get algorithm from command line argument
 if {$argc != 1} {
     send_user "Usage: expect expect.sh <algorithm>\n"
@@ -119,3 +152,9 @@ set algorithm [lindex $argv 0]
 run_file_tests $algorithm $test_files
 run_stdin_tests $algorithm $test_files
 run_r_option_tests $algorithm $test_files
+run_multiple_files_test $algorithm $test_files
+
+# run_test_stdin
+# run_test_files
+# run_test_files_many
+# run_test_option_r
