@@ -219,7 +219,6 @@ int main(int ac, char ** av) {
         .entry = *item_found,
         .options = 0,
         .filename = NULL,
-        .message = NULL,
         .message_len = 0,
         .hash = {0},
         .words_number = !strcmp(item_found->key, "md5") ? 4 : 8, /// @todo
@@ -278,7 +277,6 @@ int main(int ac, char ** av) {
             return EXIT_SUCCESS;
         else {
             optind--;
-            context.message = NULL; // TODO: delete
             context.message_len = 0;
             UNSET_OPTION_P(context.options);
         }
