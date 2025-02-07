@@ -149,7 +149,7 @@ void md5(ft_ssl_context_t * context, FILE * file) {
     context->hash[2] = 0x98BADCFE;
     context->hash[3] = 0x10325476;
 
-    if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+    if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
         write(1, "(\"", 2);
 
     size_t read_bytes = 0;
@@ -180,7 +180,7 @@ void md5(ft_ssl_context_t * context, FILE * file) {
             }
         }
 
-        if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+        if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
             write(1, context->message_chunk, read_bytes);
     }
 
@@ -191,7 +191,7 @@ void md5(ft_ssl_context_t * context, FILE * file) {
         md5_update(context->message_chunk, context->message_chunk_len, context->hash);
     }
 
-    if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+    if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
         write(1, "\")= ", 4);
 
     md5_final(context->hash);
@@ -201,7 +201,7 @@ void md5(ft_ssl_context_t * context, FILE * file) {
 
 int main(int ac, char ** av) {
 
-    if (ac < 3)
+    if (ac < 2)
         return exit_error(print_usage, av[0]);
 
     // Initialize the hash table
@@ -224,6 +224,9 @@ int main(int ac, char ** av) {
     if (!item_found)
         return exit_error(print_usage, av[0]);
 
+    // Skip the hash name argument
+    optind++;
+
     // Initialize the context
     ft_ssl_context_t context = {
         .entry = *item_found,
@@ -238,7 +241,7 @@ int main(int ac, char ** av) {
 
     // Parse the options
     int opt;
-    while ((opt = getopt(ac, av, "pqrs:")) != -1) {
+    while ((opt = getopt(ac, av, "+pqrs:")) != -1) {
         switch (opt) {
             case 'p':
                 SET_OPTION_P(context.options);
@@ -267,6 +270,7 @@ int main(int ac, char ** av) {
     // Read from string
     if (IS_OPTION_S(context.options)) {
 
+        /// @todo
         // Setup the context
         SET_OPTION_P(context.options);
 
@@ -281,18 +285,16 @@ int main(int ac, char ** av) {
         // Close the file stream
         fclose(file);
 
-        optind += 2;
         if (optind >= ac)
             return EXIT_SUCCESS;
         else {
-            optind--;
             context.message_len = 0;
             UNSET_OPTION_P(context.options);
         }
     }
 
     // Read from file
-    if (++optind < ac) {
+    if (optind < ac) {
         for (int i = optind; i < ac; i++) {
 
             // Setup the context
