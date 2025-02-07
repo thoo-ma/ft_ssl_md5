@@ -46,7 +46,7 @@ typedef struct {
     /// @note null or mutable per execution
     char * filename;
     char * p_message;
-    long message_size;
+    size_t message_size;
     uint32_t hash[8];
 
     /// @brief The number of 32-bit words in the hash.

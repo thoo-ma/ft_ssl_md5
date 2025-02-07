@@ -7,7 +7,7 @@
 #include "sha256.h"
 #include "ft_ssl.h"
 
-void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, long message_size)
+void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size)
 {
     // DEBUG
     // fprintf(stderr, "GO pad\n");
@@ -34,9 +34,9 @@ void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, long m
     // write(2, "\n", 1);
 
     // append the original size in bits
-    uint64_t bit_size = (uint64_t)message_size * 8;
-    for (int i = 0; i < 8; i++)
-        chunk[*chunk_size + 1 + zeros + (unsigned long)i] = (bit_size >> (56 - 8 * i)) & 0xFF;
+    size_t bit_size = message_size * 8;
+    for (size_t i = 0; i < 8; i++)
+        chunk[*chunk_size + 1 + zeros + i] = (bit_size >> (56 - 8 * i)) & 0xFF;
 
     *chunk_size = 64 * (block_index + 1);
 
@@ -57,7 +57,7 @@ void sha256_update(uint8_t * chunk, size_t size, uint32_t * hash) {
     uint32_t h0 = hash[7];
 
     // process the message in successive 512-bit chunks
-    for (uint64_t i = 0; i < size; i += 64) {
+    for (size_t i = 0; i < size; i += 64) {
 
         // 1. prepare the message schedule
         uint32_t w[64] = {0};
