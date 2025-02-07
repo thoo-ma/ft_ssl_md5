@@ -195,13 +195,13 @@ int main(int ac, char ** av) {
         return exit_error(print_usage, av[0]);
 
     // Initialize the hash table
-    int table_size = 2;
-    if (hcreate((size_t)table_size) == 0)
+    size_t table_size = 2;
+    if (hcreate(table_size) == 0)
         return exit_error(perror, "hcreate");
 
     // Insert key-function pointer pairs into the hash table
     ENTRY item;
-    for (int i = 0; i < table_size; i++) {
+    for (size_t i = 0; i < table_size; i++) {
         item.key = hash_types[i];
         item.data = hash_functions[i];
         hsearch(item, ENTER);
