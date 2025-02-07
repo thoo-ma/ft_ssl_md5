@@ -183,8 +183,7 @@ void md5(ft_ssl_context_t * context, FILE * file) {
     if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
         write(1, "\")= ", 4);
 
-    /// @todo
-    memcpy(context->hash, md5_final(context->hash), context->words_number * sizeof(uint32_t));
+    md5_final(context->hash);
 
     ft_ssl_print(context);
 }

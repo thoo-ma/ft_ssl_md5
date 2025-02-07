@@ -51,4 +51,4 @@ static const md5_context_t md5_context = {
 
 void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t  * chunk_len, long message_len);
 void md5_update(uint8_t *input, uint64_t length, uint32_t * hash);
-uint32_t * md5_final(uint32_t *h);
+void md5_final(uint32_t *h);

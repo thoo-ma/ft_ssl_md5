@@ -47,13 +47,12 @@ void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_len, long messa
 }
 
 // Reverses the byte order of each 32-bit word in the hash.
-uint32_t * md5_final(uint32_t *h)
+void md5_final(uint32_t *h)
 {
     for (int i = 0; i < 4; i++) {
         h[i] = ((h[i] & 0xff) << 24) | ((h[i] & 0xff00) << 8) |
                ((h[i] & 0xff0000) >> 8) | ((h[i] & 0xff000000) >> 24);
     }
-    return h;
 }
 
 void md5_update(uint8_t * input, uint64_t length, uint32_t * hash) {
