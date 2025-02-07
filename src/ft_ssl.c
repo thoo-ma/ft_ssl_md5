@@ -84,14 +84,14 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
 void sha256(ft_ssl_context_t * context, FILE * file) {
 
     // init sha256 state
-    context->hash[0] = 0x6a09e667;
-    context->hash[1] = 0xbb67ae85;
-    context->hash[2] = 0x3c6ef372;
-    context->hash[3] = 0xa54ff53a;
-    context->hash[4] = 0x510e527f;
-    context->hash[5] = 0x9b05688c;
-    context->hash[6] = 0x1f83d9ab;
-    context->hash[7] = 0x5be0cd19;
+    context->hash[0] = sha256_context.h0;
+    context->hash[1] = sha256_context.h1;
+    context->hash[2] = sha256_context.h2;
+    context->hash[3] = sha256_context.h3;
+    context->hash[4] = sha256_context.h4;
+    context->hash[5] = sha256_context.h5;
+    context->hash[6] = sha256_context.h6;
+    context->hash[7] = sha256_context.h7;
 
     if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
         write(1, "(\"", 2);
@@ -144,10 +144,10 @@ void sha256(ft_ssl_context_t * context, FILE * file) {
 void md5(ft_ssl_context_t * context, FILE * file) {
 
     // init md5 state
-    context->hash[0] = 0x67452301;
-    context->hash[1] = 0xEFCDAB89;
-    context->hash[2] = 0x98BADCFE;
-    context->hash[3] = 0x10325476;
+    context->hash[0] = md5_context.h0;
+    context->hash[1] = md5_context.h1;
+    context->hash[2] = md5_context.h2;
+    context->hash[3] = md5_context.h3;
 
     if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
         write(1, "(\"", 2);
