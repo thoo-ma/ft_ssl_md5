@@ -26,4 +26,12 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+test: test_md5 test_sha256
+
+test_md5:
+	@expect -f expect.sh md5
+
+test_sha256:
+	@expect -f expect.sh sha256
+
+.PHONY: all clean fclean re test test_md5 test_sha256
