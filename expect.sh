@@ -81,19 +81,29 @@ proc run_stdin_tests {algorithm test_files} {
 proc run_r_option_tests {algorithm test_files} {
     send_user "\n=== Testing the -r option ===\n"
     foreach filename $test_files {
+        # Disable logging of spawn output
         log_user 0
+
+        # Get openssl hash
         spawn openssl $algorithm -r $filename
         expect eof
         set expected [string trim $expect_out(buffer)]
+
+        # Get ft_ssl hash
         spawn ./ft_ssl $algorithm -r $filename
         expect eof
         set output [string trim $expect_out(buffer)]
+
+        # Re-enable logging
         log_user 1
+
+        # Compare the outputs
         if { $output eq $expected } {
             send_user -- "-r option test passed for $filename ($algorithm) ✅\n"
         } else {
             send_user -- "-r option test failed for $filename ($algorithm) ❌\n"
-            send_user "Expected: '$expected_r'\nGot:      '$output'\n"
+            send_user "Expected: '$expected_r'\n"
+            send_user "Got:      '$output'\n"
         }
     }
 }
