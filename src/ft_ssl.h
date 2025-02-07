@@ -37,14 +37,14 @@
 
 typedef struct {
     ENTRY entry;
-    uint8_t options;
+    uint32_t hash[8];
+    uint8_t chunk[CHUNK_SIZE_TOTAL];
     char * filename;
     char * p_message;
     size_t message_size;
-    uint32_t hash[8];
-    uint8_t words_number; // the number of 32-bit words in the hash.
-    uint8_t chunk[CHUNK_SIZE_TOTAL];
     size_t chunk_size;
+    uint8_t options;
+    uint8_t words_number; // the number of 32-bit words in the hash.
 } ft_ssl_context_t;
 
 typedef char * hash_type_t;
