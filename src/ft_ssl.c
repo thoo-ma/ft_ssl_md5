@@ -19,7 +19,6 @@ static void __attribute__((unused)) print_context(ft_ssl_context_t * context) {
     printf("options: %d\n", context->options);
     printf("filename: %s\n", context->filename);
     printf("message size: %ld\n", context->message_size);
-    printf("words number: %d\n", context->words_number);
     printf("chunk size: %ld\n", context->chunk_size);
     printf("chunk: %s\n", (char *)context->chunk);
 }
@@ -38,7 +37,8 @@ static int exit_error(void (*f)(const char *), const char *prog_name) {
 }
 
 static void print_hash(ft_ssl_context_t * context) {
-    for (size_t i = 0; i < context->words_number; i++)
+    size_t words = !strcmp(context->entry.key, "md5") ? 4 : 8;
+    for (size_t i = 0; i < words; i++)
         printf("%08x", context->hash[i]);
 }
 
@@ -221,7 +221,6 @@ int main(int ac, char ** av) {
         .filename = NULL,
         .message_size = 0,
         .hash = {0},
-        .words_number = !strcmp(item_found->key, "md5") ? 4 : 8, /// @todo
         .chunk = {0},
         .chunk_size = 0,
     };

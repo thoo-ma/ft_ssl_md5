@@ -44,7 +44,6 @@ typedef struct {
     size_t message_size;
     size_t chunk_size;
     uint8_t options;
-    uint8_t words_number; // the number of 32-bit words in the hash.
 } ft_ssl_context_t;
 
 typedef char * hash_type_t;
