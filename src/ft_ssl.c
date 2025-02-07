@@ -11,8 +11,9 @@
 #include "ft_ssl.h"
 
 const hash_type_t hash_types[] = { "md5", "sha256" };
-const hash_type_t hash_types_upper[] = { "MD5", "SHA256" };
 const hash_function_t hash_functions[] = { md5, sha256 };
+// const hash_type_t hash_types_upper[] = { "MD5", "SHA256" };
+// const uint8_t hash_words[] = { 4, 8 };
 
 static void __attribute__((unused)) print_context(ft_ssl_context_t * context) {
     printf("hash type: %s\n", context->entry.key);
@@ -53,7 +54,7 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
         ? printf(" *%s\n", context->filename)
         : printf(" *stdin\n");
     } else if (context->filename) {
-        printf("%s(%s)= ", !strcmp(context->entry.key, "md5") ? hash_types_upper[0] : hash_types_upper[1], context->filename);
+        printf("%s(%s)= ", !strcmp(context->entry.key, "md5") ? "MD5" : "SHA256", context->filename);
         print_hash(context);
         printf("\n");
     } else if (context->options & OPTION_P) {
