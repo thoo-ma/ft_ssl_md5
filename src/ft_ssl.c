@@ -11,7 +11,7 @@
 #include "ft_ssl.h"
 
 const hash_type_t hash_types[] = { "md5", "sha256" };
-
+const hash_type_t hash_types_upper[] = { "MD5", "SHA256" };
 const hash_function_t hash_functions[] = { md5, sha256 };
 
 static void __attribute__((unused)) print_context(ft_ssl_context_t * context) {
@@ -22,12 +22,6 @@ static void __attribute__((unused)) print_context(ft_ssl_context_t * context) {
     printf("words number: %d\n", context->words_number);
     printf("chunk size: %ld\n", context->chunk_size);
     printf("chunk: %s\n", (char *)context->chunk);
-}
-
-static void to_uppercase(const char *src, char *dest, size_t size) {
-    for (size_t i = 0; i < size - 1 && src[i] != '\0'; i++)
-        dest[i] = (char)toupper((unsigned char) src[i]);
-    dest[size - 1] = '\0';
 }
 
 static void print_usage(const char *prog_name) {
@@ -50,12 +44,6 @@ static void print_hash(ft_ssl_context_t * context) {
 
 static void ft_ssl_print(ft_ssl_context_t *context) {
 
-    /// @todo do uppercase in place (only used once)
-    /// @todo set this number dynamically
-    // 7 cause the longest hash type is "sha256"
-    char algo_name[7] = {0};
-    to_uppercase(context->entry.key, algo_name, 7);
-
     if (context->options & OPTION_Q) {
         print_hash(context);
         printf("\n");
@@ -65,8 +53,7 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
         ? printf(" *%s\n", context->filename)
         : printf(" *stdin\n");
     } else if (context->filename) {
-        // printf("%s(%s)= ", context->entry.key, context->filename);
-        printf("%s(%s)= ", algo_name, context->filename);
+        printf("%s(%s)= ", !strcmp(context->entry.key, "md5") ? hash_types_upper[0] : hash_types_upper[1], context->filename);
         print_hash(context);
         printf("\n");
     } else if (context->options & OPTION_P) {
