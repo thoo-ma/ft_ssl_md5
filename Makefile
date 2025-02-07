@@ -26,7 +26,7 @@ fclean: clean
 
 re: fclean all
 
-test: test_md5 test_sha256
+test: all test_md5 test_sha256
 
 test_md5:
 	@expect -f expect.sh md5
