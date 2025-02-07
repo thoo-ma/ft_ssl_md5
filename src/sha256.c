@@ -7,44 +7,44 @@
 #include "sha256.h"
 #include "ft_ssl.h"
 
-void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_len, long message_len)
+void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, long message_size)
 {
     // DEBUG
     // fprintf(stderr, "GO pad\n");
 
     // end the '1' bit
-    chunk[*chunk_len] = 0x80;
+    chunk[*chunk_size] = 0x80;
 
     // DEBUG
-    // fprintf(stderr, "chunk_len: %lu\n", *chunk_len);
-    // fprintf(stderr, "message_len: %lu\n", message_len);
+    // fprintf(stderr, "chunk_size: %lu\n", *chunk_size);
+    // fprintf(stderr, "message_size: %lu\n", message_size);
 
     // append '0' bits to the last 512 bits block of the chunk
-    size_t block_index = (*chunk_len + 1) / 64;
-    size_t zeros = 64 * (block_index + 1) - *chunk_len - 1 - 8;
+    size_t block_index = (*chunk_size + 1) / 64;
+    size_t zeros = 64 * (block_index + 1) - *chunk_size - 1 - 8;
 
     // DEBUG
     // fprintf(stderr, "block_index: %lu\n", block_index);
     // fprintf(stderr, "zeros: %lu\n", zeros);
 
-    memset(chunk + *chunk_len + 1, 0, zeros);
+    memset(chunk + *chunk_size + 1, 0, zeros);
 
     // DEBUG
-    // write(2, chunk, *chunk_len);
+    // write(2, chunk, *chunk_size);
     // write(2, "\n", 1);
 
-    // append the original length in bits
-    uint64_t bit_len = (uint64_t)message_len * 8;
+    // append the original size in bits
+    uint64_t bit_size = (uint64_t)message_size * 8;
     for (int i = 0; i < 8; i++)
-        chunk[*chunk_len + 1 + zeros + (unsigned long)i] = (bit_len >> (56 - 8 * i)) & 0xFF;
+        chunk[*chunk_size + 1 + zeros + (unsigned long)i] = (bit_size >> (56 - 8 * i)) & 0xFF;
 
-    *chunk_len = 64 * (block_index + 1);
+    *chunk_size = 64 * (block_index + 1);
 
     // DEBUG
-    // fprintf(stderr, "__ chunk_len: %lu\n", *chunk_len);
+    // fprintf(stderr, "__ chunk_size: %lu\n", *chunk_size);
 }
 
-void sha256_update(uint8_t * input, size_t input_len, uint32_t * hash) {
+void sha256_update(uint8_t * chunk, size_t size, uint32_t * hash) {
 
     // Load the state
     uint32_t a0 = hash[0];
@@ -57,13 +57,13 @@ void sha256_update(uint8_t * input, size_t input_len, uint32_t * hash) {
     uint32_t h0 = hash[7];
 
     // process the message in successive 512-bit chunks
-    for (uint64_t i = 0; i < input_len; i += 64) {
+    for (uint64_t i = 0; i < size; i += 64) {
 
         // 1. prepare the message schedule
         uint32_t w[64] = {0};
 
         for (uint8_t j = 0; j < 16; j++)
-            w[j] = (uint32_t)(input[i + j * 4] << 24) | (uint32_t)(input[i + j * 4 + 1] << 16) | (uint32_t)(input[i + j * 4 + 2] << 8) | (uint32_t)(input[i + j * 4 + 3]);
+            w[j] = (uint32_t)(chunk[i + j * 4] << 24) | (uint32_t)(chunk[i + j * 4 + 1] << 16) | (uint32_t)(chunk[i + j * 4 + 2] << 8) | (uint32_t)(chunk[i + j * 4 + 3]);
 
         for (uint8_t j = 16; j < 64; j++)
             w[j] = SSIG1(w[j - 2]) + w[j - 7] + SSIG0(w[j - 15]) + w[j - 16];

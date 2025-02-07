@@ -45,15 +45,8 @@ typedef struct {
 
     /// @note null or mutable per execution
     char * filename;
-
     char * p_message;
-
-    /// @brief The length of the message.
-    /// @note null or mutable per execution (uint64_t)
-    long message_len;
-
-    /// @brief The hash value.
-    /// @note constant per execution
+    long message_size;
     uint32_t hash[8];
 
     /// @brief The number of 32-bit words in the hash.
@@ -62,10 +55,7 @@ typedef struct {
 
     /// @note mutable per execution;
     uint8_t message_chunk[CHUNK_SIZE_TOTAL];
-
-    /// @note mutable per execution;
-    size_t message_chunk_len;
-
+    size_t message_chunk_size;
 } ft_ssl_context_t;
 
 typedef char * hash_type_t;

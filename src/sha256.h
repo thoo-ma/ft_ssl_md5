@@ -47,5 +47,5 @@ static sha256_context_t sha256_context = {
     }
 };
 
-void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t  * chunk_len, long message_len);
-void sha256_update(uint8_t * input, size_t input_len, uint32_t * hash);
+void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, long message_size);
+void sha256_update(uint8_t * chunk, size_t size, uint32_t * hash);
