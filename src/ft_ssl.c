@@ -122,11 +122,11 @@ void sha256(ft_ssl_context_t * context, FILE * file) {
             write(1, context->message_chunk, read_bytes);
     }
 
-    /// @todo
-    // handle empty stream
+    // Handle empty stream
     if (context->message_len == 0) {
-        printf("empty stream\n");
-        ((hash_function_t)context->entry.data)(context, file);
+        context->message_chunk_len = 0;
+        sha256_padding(context->message_chunk, &context->message_chunk_len, 0);
+        sha256_update(context->message_chunk, context->message_chunk_len, context->hash);
     }
 
     if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
@@ -173,11 +173,11 @@ void md5(ft_ssl_context_t * context, FILE * file) {
             write(1, context->message_chunk, read_bytes);
     }
 
-    /// @todo
-    // handle empty stream
+    // Handle empty stream
     if (context->message_len == 0) {
-        printf("empty stream\n");
-        ((hash_function_t)context->entry.data)(context, file);
+        context->message_chunk_len = 0;
+        md5_padding(context->message_chunk, &context->message_chunk_len, 0);
+        md5_update(context->message_chunk, context->message_chunk_len, context->hash);
     }
 
     if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
