@@ -37,4 +37,7 @@ test_md5:
 test_sha256:
 	@expect -f expect.sh sha256
 
-.PHONY: all clean fclean re test test_md5 test_sha256 debug
+tidy:
+	clang-tidy --quiet $(SRCS) -- $(CFLAGS)
+
+.PHONY: all clean fclean re test test_md5 test_sha256 debug tidy
