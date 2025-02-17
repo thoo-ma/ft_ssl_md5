@@ -26,6 +26,9 @@ fclean: clean
 
 re: fclean all
 
+debug: CFLAGS += -DDEBUG
+debug: re
+
 test: all test_md5 test_sha256
 
 test_md5:
@@ -34,4 +37,4 @@ test_md5:
 test_sha256:
 	@expect -f expect.sh sha256
 
-.PHONY: all clean fclean re test test_md5 test_sha256
+.PHONY: all clean fclean re test test_md5 test_sha256 debug
