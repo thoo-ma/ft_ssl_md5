@@ -45,28 +45,28 @@ static void print_hash(ft_ssl_context_t *context) {
 
 static void ft_ssl_print(ft_ssl_context_t *context) {
 
-    if (context->options & OPTION_Q) {
+    if (IS_OPTION_Q(context->options)) {
         print_hash(context);
         printf("\n");
-    } else if (context->options & OPTION_R) {
+        return;
+    }
+
+    if (IS_OPTION_R(context->options)) {
         print_hash(context);
-        context->filename
-        ? printf(" *%s\n", context->filename)
-        : printf(" *stdin\n");
-    } else if (context->filename) {
+        printf(" *%s\n", context->filename ? context->filename : "stdin");
+        return;
+    }
+
+    if (context->filename) {
         printf("%s(%s)= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name, context->filename);
-        print_hash(context);
-        printf("\n");
-    } else if (context->options & OPTION_P) {
-        if (context->p_message)
-            printf("(\"%s\")= ", context->p_message);
-        print_hash(context);
-        printf("\n");
+    } else if (context->p_message && IS_OPTION_P(context->options)) {
+        printf("(\"%s\")= ", context->p_message);
     } else {
         printf("(stdin)= ");
-        print_hash(context);
-        printf("\n");
     }
+
+    print_hash(context);
+    printf("\n");
 }
 
 void sha256(ft_ssl_context_t * context, FILE * file) {
