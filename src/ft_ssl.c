@@ -11,7 +11,7 @@
 #include "sha256.h"
 #include "ft_ssl.h"
 
-const ft_ssl_algorithm_t algorithms[] = {
+static const ft_ssl_algorithm_t algorithms[] = {
     {"md5",    "MD5",    4, md5},
     {"sha256", "SHA256", 8, sha256},
     {NULL, NULL, 0, NULL}
@@ -34,9 +34,9 @@ static void print_missing_argument(const char *prog_name) {
     fprintf(stderr, "%s: option -s requires an argument\n", prog_name);
 }
 
-static int exit_error(void (*f)(const char *), const char *prog_name) {
+static void exit_error(void (*f)(const char *), const char *prog_name) {
     f(prog_name);
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
 }
 
 static void print_hash(ft_ssl_context_t *context) {
@@ -138,15 +138,15 @@ void md5(ft_ssl_context_t *context, FILE *file) {
     ft_ssl_print(context);
 }
 
-int main(int ac, char ** av) {
+static void ft_ssl_init(ft_ssl_context_t *context, int ac, char **av) {
 
     if (ac < 2)
-        return exit_error(print_usage, av[0]);
+        exit_error(print_usage, av[0]);
 
     // Initialize the hash table
     size_t table_size = 2;
     if (hcreate(table_size) == 0)
-        return exit_error(perror, "hcreate");
+        exit_error(perror, "hcreate");
 
     // Insert key-function pointer pairs into the hash table
     ENTRY item;
@@ -158,51 +158,49 @@ int main(int ac, char ** av) {
 
     // Check if the hash type is valid
     item.key = av[optind];
-    item.data = NULL;
-    ENTRY * item_found = hsearch(item, FIND);
+    ENTRY *item_found = hsearch(item, FIND);
     if (!item_found)
-        return exit_error(print_usage, av[0]);
+        exit_error(print_usage, av[0]);
 
     // Skip the hash name argument
     optind++;
 
     // Initialize the context
-    ft_ssl_context_t context = {
-        .entry = *item_found,
-        .options = 0,
-        .filename = NULL,
-        .message_size = 0,
-        .hash = {0},
-        .chunk = {0},
-        .chunk_size = 0,
-    };
+    memset(context, 0, sizeof(ft_ssl_context_t));
+    context->entry = *item_found;
 
     // Parse the options
     int opt;
     while ((opt = getopt(ac, av, "+pqrs:")) != -1) {
         switch (opt) {
             case 'p':
-                SET_OPTION_P(context.options);
+                SET_OPTION_P(context->options);
                 break;
             case 'q':
-                SET_OPTION_Q(context.options);
+                SET_OPTION_Q(context->options);
                 break;
             case 'r':
-                SET_OPTION_R(context.options);
+                SET_OPTION_R(context->options);
                 break;
             case 's':
-                SET_OPTION_S(context.options);
+                SET_OPTION_S(context->options);
                 if (!optarg)
-                    return exit_error(print_missing_argument, av[0]);
-                context.p_message = optarg;
+                    exit_error(print_missing_argument, av[0]);
+                context->p_message = optarg;
                 break;
-            default: return exit_error(print_usage, av[0]);
+            default: exit_error(print_usage, av[0]);
         }
     }
+}
+
+int main(int ac, char ** av) {
+
+    ft_ssl_context_t context;
+    ft_ssl_init(&context, ac, av);
 
     // Read from stdin
     if (!isatty(fileno(stdin))) {
-        ((ft_ssl_algorithm_t *)item_found->data)->f(&context, stdin);
+        ((ft_ssl_algorithm_t *)context.entry.data)->f(&context, stdin);
     }
 
     // Read from string
@@ -218,7 +216,7 @@ int main(int ac, char ** av) {
             exit_error(perror, "fmemopen");
 
         // Hash the message
-        ((ft_ssl_algorithm_t *)item_found->data)->f(&context, file);
+        ((ft_ssl_algorithm_t *)context.entry.data)->f(&context, file);
 
         // Close the file stream
         fclose(file);
@@ -233,8 +231,6 @@ int main(int ac, char ** av) {
             // Setup the context
             context.message_size = 0;
             context.filename = av[i];
-            // context.p_message = NULL;
-            // UNSET_OPTION_S(context.options);
 
             // Open from file
             FILE *file = fopen(av[i], "rb");
@@ -244,7 +240,7 @@ int main(int ac, char ** av) {
             }
 
             // Hash the message
-            ((ft_ssl_algorithm_t *)item_found->data)->f(&context, file);
+            ((ft_ssl_algorithm_t *)context.entry.data)->f(&context, file);
 
             // Close the file stream
             fclose(file);
