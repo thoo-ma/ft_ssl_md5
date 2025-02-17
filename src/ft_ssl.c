@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <stdbool.h>
 
 #include "md5.h"
 #include "sha256.h"
@@ -69,9 +70,16 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
     printf("\n");
 }
 
-static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)(uint8_t *, size_t *, size_t), void (*update)(uint8_t *, size_t, uint32_t *)) {
+static bool should_print_stdin_output(ft_ssl_context_t *context) {
+    return !context->filename &&
+           IS_OPTION_P(context->options) &&
+           !IS_OPTION_S(context->options) &&
+           !IS_OPTION_R(context->options) &&
+           !IS_OPTION_Q(context->options);
+}
 
-    if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)(uint8_t *, size_t *, size_t), void (*update)(uint8_t *, size_t, uint32_t *)) {
+    if (should_print_stdin_output(context))
         write(1, "(\"", 2);
 
     size_t read_bytes = 0;
@@ -102,7 +110,7 @@ static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)
             }
         }
 
-        if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+        if (should_print_stdin_output(context))
             write(1, context->chunk, read_bytes);
     }
 
@@ -113,7 +121,7 @@ static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)
         update(context->chunk, context->chunk_size, context->hash);
     }
 
-    if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
+    if (should_print_stdin_output(context))
         write(1, "\")= ", 4);
 }
 
