@@ -10,13 +10,14 @@
 #include "sha256.h"
 #include "ft_ssl.h"
 
-const hash_type_t hash_types[] = { "md5", "sha256" };
-const hash_function_t hash_functions[] = { md5, sha256 };
-// const hash_type_t hash_types_upper[] = { "MD5", "SHA256" };
-// const uint8_t hash_words[] = { 4, 8 };
+const ft_ssl_algorithm_t algorithms[] = {
+    {"md5",    "MD5",    4, md5},
+    {"sha256", "SHA256", 8, sha256},
+    {NULL, NULL, 0, NULL}
+};
 
 static void __attribute__((unused)) print_context(ft_ssl_context_t * context) {
-    printf("hash type: %s\n", context->entry.key);
+    printf("hash type: %s\n", ((ft_ssl_algorithm_t *)context->entry.data)->lower_name);
     printf("options: %d\n", context->options);
     printf("filename: %s\n", context->filename);
     printf("message size: %ld\n", context->message_size);
@@ -37,9 +38,8 @@ static int exit_error(void (*f)(const char *), const char *prog_name) {
     return EXIT_FAILURE;
 }
 
-static void print_hash(ft_ssl_context_t * context) {
-    size_t words = !strcmp(context->entry.key, "md5") ? 4 : 8;
-    for (size_t i = 0; i < words; i++)
+static void print_hash(ft_ssl_context_t *context) {
+    for (size_t i = 0; i < ((ft_ssl_algorithm_t *)context->entry.data)->word_count; i++)
         printf("%08x", context->hash[i]);
 }
 
@@ -54,7 +54,7 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
         ? printf(" *%s\n", context->filename)
         : printf(" *stdin\n");
     } else if (context->filename) {
-        printf("%s(%s)= ", !strcmp(context->entry.key, "md5") ? "MD5" : "SHA256", context->filename);
+        printf("%s(%s)= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name, context->filename);
         print_hash(context);
         printf("\n");
     } else if (context->options & OPTION_P) {
@@ -200,8 +200,8 @@ int main(int ac, char ** av) {
     // Insert key-function pointer pairs into the hash table
     ENTRY item;
     for (size_t i = 0; i < table_size; i++) {
-        item.key = hash_types[i];
-        item.data = hash_functions[i];
+        item.key = (char *)algorithms[i].lower_name;
+        item.data = (ft_ssl_algorithm_t *)&algorithms[i];
         hsearch(item, ENTER);
     }
 
@@ -251,7 +251,7 @@ int main(int ac, char ** av) {
 
     // Read from stdin
     if (!isatty(fileno(stdin))) {
-        ((hash_function_t)context.entry.data)(&context, stdin);
+        ((ft_ssl_algorithm_t *)item_found->data)->f(&context, stdin);
     }
 
     // Read from string
@@ -267,7 +267,7 @@ int main(int ac, char ** av) {
             exit_error(perror, "fmemopen");
 
         // Hash the message
-        ((hash_function_t)context.entry.data)(&context, file);
+        ((ft_ssl_algorithm_t *)item_found->data)->f(&context, file);
 
         // Close the file stream
         fclose(file);
@@ -293,7 +293,7 @@ int main(int ac, char ** av) {
             }
 
             // Hash the message
-            ((hash_function_t)context.entry.data)(&context, file);
+            ((ft_ssl_algorithm_t *)item_found->data)->f(&context, file);
 
             // Close the file stream
             fclose(file);

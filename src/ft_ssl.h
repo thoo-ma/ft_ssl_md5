@@ -46,16 +46,16 @@ typedef struct {
     uint8_t options;
 } ft_ssl_context_t;
 
-typedef char * hash_type_t;
-typedef void (*hash_function_t)(ft_ssl_context_t *, FILE * file);
+typedef struct {
+    const char *lower_name;                     // lowercase name
+    const char *upper_name;                     // uppercase name
+    size_t word_count;                          // number of words in hash output
+    void (*f)(ft_ssl_context_t *, FILE * file); // hash function
+} ft_ssl_algorithm_t;
+
 
 void md5(ft_ssl_context_t *, FILE * file);
 void sha256(ft_ssl_context_t *, FILE * file);
-
-extern const hash_type_t hash_types[]; // possible values for ENTRY key
-extern const hash_function_t hash_functions[]; // possible values for ENTRY data
-
-// extern const hash_context_t hash_contexts[];
 
 // type
 // - context
