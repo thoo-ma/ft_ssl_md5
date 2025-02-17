@@ -53,7 +53,6 @@ typedef struct {
     void (*f)(ft_ssl_context_t *, FILE * file); // hash function
 } ft_ssl_algorithm_t;
 
-
 void md5(ft_ssl_context_t *, FILE * file);
 void sha256(ft_ssl_context_t *, FILE * file);
 

@@ -7,6 +7,17 @@
 #include "sha256.h"
 #include "ft_ssl.h"
 
+void sha256_init(uint32_t hash[8]) {
+    hash[0] = sha256_context.h0;
+    hash[1] = sha256_context.h1;
+    hash[2] = sha256_context.h2;
+    hash[3] = sha256_context.h3;
+    hash[4] = sha256_context.h4;
+    hash[5] = sha256_context.h5;
+    hash[6] = sha256_context.h6;
+    hash[7] = sha256_context.h7;
+}
+
 void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size)
 {
     // DEBUG

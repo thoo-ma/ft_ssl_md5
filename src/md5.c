@@ -7,6 +7,13 @@
 #include "md5.h"
 #include "ft_ssl.h"
 
+void md5_init(uint32_t hash[4]) {
+    hash[0] = md5_context.h0;
+    hash[1] = md5_context.h1;
+    hash[2] = md5_context.h2;
+    hash[3] = md5_context.h3;
+}
+
 void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size)
 {
     // DEBUG

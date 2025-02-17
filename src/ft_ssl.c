@@ -69,73 +69,7 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
     printf("\n");
 }
 
-void sha256(ft_ssl_context_t * context, FILE * file) {
-
-    // init sha256 state
-    context->hash[0] = sha256_context.h0;
-    context->hash[1] = sha256_context.h1;
-    context->hash[2] = sha256_context.h2;
-    context->hash[3] = sha256_context.h3;
-    context->hash[4] = sha256_context.h4;
-    context->hash[5] = sha256_context.h5;
-    context->hash[6] = sha256_context.h6;
-    context->hash[7] = sha256_context.h7;
-
-    if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
-        write(1, "(\"", 2);
-
-    size_t read_bytes = 0;
-    int was_full_chunk = 0;
-
-    while ((read_bytes = fread(context->chunk, 1, CHUNK_SIZE_READ, file)) > 0) {
-        context->chunk_size = read_bytes;
-        context->message_size += read_bytes;
-        was_full_chunk = (read_bytes == CHUNK_SIZE_READ);
-
-        if (read_bytes < CHUNK_SIZE_READ) {
-            // last chunk -> do final padding
-            sha256_padding(context->chunk, &context->chunk_size, context->message_size);
-            sha256_update(context->chunk, context->chunk_size, context->hash);
-        } else {
-            // If reading from stdin, just process the chunk
-            if (file == stdin) {
-                sha256_update(context->chunk, context->chunk_size, context->hash);
-            } else {
-                // For regular files, we can safely check for EOF
-                if (fgetc(file) == EOF) {
-                    sha256_padding(context->chunk, &context->chunk_size, context->message_size);
-                    sha256_update(context->chunk, context->chunk_size, context->hash);
-                } else {
-                    fseek(file, -1, SEEK_CUR);
-                    sha256_update(context->chunk, context->chunk_size, context->hash);
-                }
-            }
-        }
-
-        if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
-            write(1, context->chunk, read_bytes);
-    }
-
-    // Handle empty stream or final padding for stdin
-    if (context->message_size == 0 || (file == stdin && was_full_chunk)) {
-        context->chunk_size = 0;
-        sha256_padding(context->chunk, &context->chunk_size, context->message_size);
-        sha256_update(context->chunk, context->chunk_size, context->hash);
-    }
-
-    if (!IS_OPTION_S(context->options) && IS_OPTION_P(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
-        write(1, "\")= ", 4);
-
-    ft_ssl_print(context);
-}
-
-void md5(ft_ssl_context_t * context, FILE * file) {
-
-    // init md5 state
-    context->hash[0] = md5_context.h0;
-    context->hash[1] = md5_context.h1;
-    context->hash[2] = md5_context.h2;
-    context->hash[3] = md5_context.h3;
+static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)(uint8_t *, size_t *, size_t), void (*update)(uint8_t *, size_t, uint32_t *)) {
 
     if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
         write(1, "(\"", 2);
@@ -150,20 +84,20 @@ void md5(ft_ssl_context_t * context, FILE * file) {
 
         if (read_bytes < CHUNK_SIZE_READ) {
             // last chunk -> do final padding
-            md5_padding(context->chunk, &context->chunk_size, context->message_size);
-            md5_update(context->chunk, context->chunk_size, context->hash);
+            padding(context->chunk, &context->chunk_size, context->message_size);
+            update(context->chunk, context->chunk_size, context->hash);
         } else {
             // If reading from stdin, just process the chunk
             if (file == stdin) {
-                md5_update(context->chunk, context->chunk_size, context->hash);
+                update(context->chunk, context->chunk_size, context->hash);
             } else {
                 // For regular files, we can safely check for EOF
                 if (fgetc(file) == EOF) {
-                    md5_padding(context->chunk, &context->chunk_size, context->message_size);
-                    md5_update(context->chunk, context->chunk_size, context->hash);
+                    padding(context->chunk, &context->chunk_size, context->message_size);
+                    update(context->chunk, context->chunk_size, context->hash);
                 } else {
                     fseek(file, -1, SEEK_CUR);
-                    md5_update(context->chunk, context->chunk_size, context->hash);
+                    update(context->chunk, context->chunk_size, context->hash);
                 }
             }
         }
@@ -175,15 +109,24 @@ void md5(ft_ssl_context_t * context, FILE * file) {
     // Handle empty stream or final padding for stdin
     if (context->message_size == 0 || (file == stdin && was_full_chunk)) {
         context->chunk_size = 0;
-        md5_padding(context->chunk, &context->chunk_size, context->message_size);
-        md5_update(context->chunk, context->chunk_size, context->hash);
+        padding(context->chunk, &context->chunk_size, context->message_size);
+        update(context->chunk, context->chunk_size, context->hash);
     }
 
     if (!context->filename && IS_OPTION_P(context->options) && !IS_OPTION_S(context->options) && !IS_OPTION_R(context->options) && !IS_OPTION_Q(context->options))
         write(1, "\")= ", 4);
+}
 
+void sha256(ft_ssl_context_t *context, FILE *file) {
+    sha256_init(context->hash);
+    process_input(context, file, sha256_padding, sha256_update);
+    ft_ssl_print(context);
+}
+
+void md5(ft_ssl_context_t *context, FILE *file) {
+    md5_init(context->hash);
+    process_input(context, file, md5_padding, md5_update);
     md5_final(context->hash);
-
     ft_ssl_print(context);
 }
 
