@@ -4,6 +4,7 @@
 
 This program mirrors `openssl` output format.  
 The test suite expect you to have `expect` installed.
+Only difference with the subject is the last test case since it doesn't make sense to me.
 
 ## Documentation
 

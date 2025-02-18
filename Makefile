@@ -29,12 +29,12 @@ re: fclean all
 debug: CFLAGS += -DDEBUG
 debug: re
 
-test: all test_md5 test_sha256
+test: test_md5 test_sha256
 
-test_md5:
+test_md5: all
 	@expect -f expect.sh md5
 
-test_sha256:
+test_sha256: all
 	@expect -f expect.sh sha256
 
 tidy:

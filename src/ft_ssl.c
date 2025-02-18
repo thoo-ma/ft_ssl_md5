@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -241,7 +242,7 @@ int main(int ac, char ** av) {
             // Open from file
             FILE *file = fopen(av[i], "rb");
             if (!file) {
-                perror(av[i]);
+                printf("ft_ssl: %s: %s: %s\n", ((ft_ssl_algorithm_t *)context.entry.data)->lower_name, av[i], strerror(errno));
                 continue;
             }
 

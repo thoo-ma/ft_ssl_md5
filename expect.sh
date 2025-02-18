@@ -282,8 +282,8 @@ MD5(file)= 37b51d194a7513e45b56f6524f2d51f2}
             expected {("foo")= acbd18db4cc2f85cedef654fccc4a4d8
 acbd18db4cc2f85cedef654fccc4a4d8 "foo"
 37b51d194a7513e45b56f6524f2d51f2 *file
--s: No such file or directory
-bar: No such file or directory}
+ft_ssl: md5: -s: No such file or directory
+ft_ssl: md5: bar: No such file or directory}
         }
         stdin_file_rpsq {
             cmd {echo -n foo | ./ft_ssl %s -r -q -p -s foo file}
