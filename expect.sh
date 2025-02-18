@@ -287,7 +287,7 @@ bar: No such file or directory}
         }
         stdin_file_rpsq {
             cmd {echo -n foo | ./ft_ssl %s -r -q -p -s foo file}
-            expected {acbd18db4cc2f85cedef654fccc4a4d8
+            expected {("foo")= acbd18db4cc2f85cedef654fccc4a4d8
 acbd18db4cc2f85cedef654fccc4a4d8
 37b51d194a7513e45b56f6524f2d51f2}
         }
@@ -344,10 +344,10 @@ if {$argc != 1} {
 }
 set algorithm [lindex $argv 0]
 
-# run_file_tests $algorithm $test_files
-# run_stdin_tests $algorithm $test_files
-# run_r_option_tests $algorithm $test_files
-# run_multiple_files_test $algorithm $test_files
+run_file_tests $algorithm $test_files
+run_stdin_tests $algorithm $test_files
+run_r_option_tests $algorithm $test_files
+run_multiple_files_test $algorithm $test_files
 run_subject_cases $algorithm
 
 # run_test_stdin

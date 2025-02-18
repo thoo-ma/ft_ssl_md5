@@ -44,7 +44,14 @@ static void print_hash(ft_ssl_context_t *context) {
         printf("%08x", context->hash[i]);
 }
 
-static void ft_ssl_print(ft_ssl_context_t *context) {
+static void ft_ssl_print(ft_ssl_context_t *context, FILE * file) {
+
+    // when reading from stdin, flag -p disable flags -q and -r   
+    if (file == stdin && IS_OPTION_P(context->options)) {
+        print_hash(context);
+        printf("\n");
+        return;
+    }
 
     if (IS_OPTION_Q(context->options)) {
         print_hash(context);
@@ -54,14 +61,22 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
 
     if (IS_OPTION_R(context->options)) {
         print_hash(context);
-        printf(" *%s\n", context->filename ? context->filename : "stdin");
+        if (context->p_message)
+            printf(" \"%s\"\n", context->p_message);
+        else
+            printf(" *%s\n", context->filename ? context->filename : "stdin");
         return;
     }
 
     if (context->filename) {
         printf("%s(%s)= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name, context->filename);
-    } else if (context->p_message && IS_OPTION_P(context->options)) {
-        printf("(\"%s\")= ", context->p_message);
+    } else if (IS_OPTION_S(context->options) && file != stdin) {
+        printf("%s(\"%s\")= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name, context->p_message);
+    } else if (IS_OPTION_P(context->options)) {
+        if (context->p_message) {
+            printf("(\"%s\")= ", context->p_message);
+        }
+        // Don't print anything here as the (stdin)= part is already printed by process_input
     } else {
         printf("(stdin)= ");
     }
@@ -70,16 +85,9 @@ static void ft_ssl_print(ft_ssl_context_t *context) {
     printf("\n");
 }
 
-static bool should_print_stdin_output(ft_ssl_context_t *context) {
-    return !context->filename &&
-           IS_OPTION_P(context->options) &&
-           !IS_OPTION_S(context->options) &&
-           !IS_OPTION_R(context->options) &&
-           !IS_OPTION_Q(context->options);
-}
-
 static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)(uint8_t *, size_t *, size_t), void (*update)(uint8_t *, size_t, uint32_t *)) {
-    if (should_print_stdin_output(context))
+    
+    if (file == stdin && IS_OPTION_P(context->options))
         write(1, "(\"", 2);
 
     size_t read_bytes = 0;
@@ -110,7 +118,7 @@ static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)
             }
         }
 
-        if (should_print_stdin_output(context))
+        if (file == stdin && IS_OPTION_P(context->options))
             write(1, context->chunk, read_bytes);
     }
 
@@ -121,21 +129,21 @@ static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)
         update(context->chunk, context->chunk_size, context->hash);
     }
 
-    if (should_print_stdin_output(context))
+    if (file == stdin && IS_OPTION_P(context->options))
         write(1, "\")= ", 4);
 }
 
 void sha256(ft_ssl_context_t *context, FILE *file) {
     sha256_init(context->hash);
     process_input(context, file, sha256_padding, sha256_update);
-    ft_ssl_print(context);
+    ft_ssl_print(context, file);
 }
 
 void md5(ft_ssl_context_t *context, FILE *file) {
     md5_init(context->hash);
     process_input(context, file, md5_padding, md5_update);
     md5_final(context->hash);
-    ft_ssl_print(context);
+    ft_ssl_print(context, file);
 }
 
 static void ft_ssl_init(ft_ssl_context_t *context, int ac, char **av) {
@@ -199,16 +207,15 @@ int main(int ac, char ** av) {
     ft_ssl_init(&context, ac, av);
 
     // Read from stdin
-    if (!isatty(fileno(stdin))) {
+    if (!isatty(fileno(stdin)) && (optind >= ac || IS_OPTION_P(context.options)))
         ((ft_ssl_algorithm_t *)context.entry.data)->f(&context, stdin);
-    }
 
     // Read from string
     if (IS_OPTION_S(context.options)) {
 
-        /// @todo
         // Setup the context
-        SET_OPTION_P(context.options);
+        context.message_size = 0;
+        context.filename = NULL;
 
         // Open from memory
         FILE *file = fmemopen((void *)context.p_message, strlen(context.p_message), "rb");
@@ -220,8 +227,6 @@ int main(int ac, char ** av) {
 
         // Close the file stream
         fclose(file);
-
-        UNSET_OPTION_P(context.options);
     }
 
     // Read from file
@@ -231,6 +236,7 @@ int main(int ac, char ** av) {
             // Setup the context
             context.message_size = 0;
             context.filename = av[i];
+            context.p_message = NULL;
 
             // Open from file
             FILE *file = fopen(av[i], "rb");
@@ -247,5 +253,6 @@ int main(int ac, char ** av) {
         }
     }
 
+    hdestroy();
     return EXIT_SUCCESS;
 }
