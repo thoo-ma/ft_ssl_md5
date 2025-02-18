@@ -348,9 +348,4 @@ run_file_tests $algorithm $test_files
 run_stdin_tests $algorithm $test_files
 run_r_option_tests $algorithm $test_files
 run_multiple_files_test $algorithm $test_files
-run_subject_cases $algorithm
-
-# run_test_stdin
-# run_test_files
-# run_test_files_many
-# run_test_option_r
+run_subject_cases md5
