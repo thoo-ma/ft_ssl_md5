@@ -77,7 +77,7 @@ void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t 
     // process the message in successive 512-bit chunks
     for (size_t i = 0; i < chunk_size; i += 64) {
 
-        // 1. prepare the message schedule
+        // prepare the message schedule
         uint32_t w[64] = {0};
 
         for (uint8_t j = 0; j < 16; j++)
@@ -86,7 +86,7 @@ void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t 
         for (uint8_t j = 16; j < 64; j++)
             w[j] = SSIG1(w[j - 2]) + w[j - 7] + SSIG0(w[j - 15]) + w[j - 16];
 
-        // 2. initialize the working variables
+        // initialize the working variables
         uint32_t a = a0;
         uint32_t b = b0;
         uint32_t c = c0;
@@ -96,7 +96,7 @@ void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t 
         uint32_t g = g0;
         uint32_t h = h0;
 
-        // 3. main loop
+        // main loop
         for (uint8_t j = 0; j < 64; j++) {
 
             uint32_t t1 = h + BSIG1(e) + CH(e, f, g) + sha256_context.k[j] + w[j];
@@ -112,7 +112,7 @@ void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t 
             a = t1 + t2;
         }
 
-        // 4. compute the intermediate hash value
+        // compute the intermediate hash value
         a0 += a;
         b0 += b;
         c0 += c;
