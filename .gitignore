@@ -2,3 +2,6 @@
 en.subject.pdf
 ft_ssl
 *.o
+.venv/
+__pycache__/
+.pytest_cache/
