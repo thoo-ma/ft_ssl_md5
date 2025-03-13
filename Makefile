@@ -53,6 +53,6 @@ test_sha256: all
 	@cd test && python -m pytest -v tests.py --algorithm=sha256
 
 tidy:
-	clang-tidy --quiet $(SRCS) -- $(CFLAGS)
+	clang-tidy -header-filter=.* $(SRCS) -- $(CFLAGS)
 
 .PHONY: all clean fclean re test test_md5 test_sha256 debug tidy
