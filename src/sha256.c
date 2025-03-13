@@ -1,13 +1,13 @@
-#include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #ifdef DEBUG
 #include <stdio.h>
 #include <unistd.h>
 #endif
 
-#include "sha256.h"
 #include "ft_ssl.h"
+#include "sha256.h"
 
 void sha256_init(uint32_t hash[8]) {
     hash[0] = sha256_context.h0;
@@ -20,8 +20,7 @@ void sha256_init(uint32_t hash[8]) {
     hash[7] = sha256_context.h7;
 }
 
-void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size)
-{
+void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
     #ifdef DEBUG
     fprintf(stderr, "GO pad\n");
     #endif

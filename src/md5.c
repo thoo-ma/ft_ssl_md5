@@ -1,13 +1,13 @@
-#include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #ifdef DEBUG
 #include <stdio.h>
 #include <unistd.h>
 #endif
 
-#include "md5.h"
 #include "ft_ssl.h"
+#include "md5.h"
 
 void md5_init(uint32_t hash[4]) {
     hash[0] = md5_context.h0;
@@ -16,8 +16,7 @@ void md5_init(uint32_t hash[4]) {
     hash[3] = md5_context.h3;
 }
 
-void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size)
-{
+void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
     #ifdef DEBUG
     fprintf(stderr, "GO pad\n");
     #endif
@@ -58,8 +57,7 @@ void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t me
 }
 
 /// @brief Reverse the byte order of each 32-bit word in the hash.
-void md5_final(uint32_t hash[4])
-{
+void md5_final(uint32_t hash[4]) {
     hash[0] = ((hash[0] & 0xff) << 24) | ((hash[0] & 0xff00) << 8) |
               ((hash[0] & 0xff0000) >> 8) | ((hash[0] & 0xff000000) >> 24);
     hash[1] = ((hash[1] & 0xff) << 24) | ((hash[1] & 0xff00) << 8) |
@@ -79,12 +77,11 @@ void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t has
     uint32_t d0 = hash[3];
 
     // process the message in successive 512-bit chunks
-    for (size_t i = 0; i < chunk_size; i += 64)
-    {
+    for (size_t i = 0; i < chunk_size; i += 64) {
         // break chunk into sixteen 32-bit words
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wcast-align"
-        uint32_t * w = (uint32_t*)(chunk + i);
+        uint32_t * w = (uint32_t *)(chunk + i);
         #pragma GCC diagnostic pop
 
         uint32_t a = a0;
@@ -97,20 +94,20 @@ void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t has
 
             uint32_t f, g;
 
-            // round 1
             if (j < 16) {
+                // round 1
                 f = (b & c) | ((~b) & d);
                 g = j;
-            // round 2
             } else if (j < 32) {
+                // round 2
                 f = (d & b) | ((~d) & c);
                 g = (5 * j + 1) % 16;
-            // round 3
             } else if (j < 48) {
+                // round 3
                 f = b ^ c ^ d;
                 g = (3 * j + 5) % 16;
-            // round 4
             } else {
+                // round 4
                 f = c ^ (b | (~d));
                 g = (7 * j) % 16;
             }

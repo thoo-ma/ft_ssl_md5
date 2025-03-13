@@ -1,0 +1,10 @@
+---
+Language: Cpp
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+PointerAlignment: Middle
+ColumnLimit: 0
+IndentPPDirectives: None
+IndentCaseLabels: true
+# AlignArrayOfStructures: Right

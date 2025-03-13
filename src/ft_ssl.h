@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdio.h> // for FILE
 #include <search.h> // for ENTRY
+#include <stdio.h>  // for FILE
 
 #define OPTION_P (1 << 0) // 00000001
 #define OPTION_Q (1 << 1) // 00000010
@@ -47,8 +47,8 @@ typedef struct {
 } ft_ssl_context_t;
 
 typedef struct {
-    const char *lower_name;                     // lowercase name
-    const char *upper_name;                     // uppercase name
+    const char * lower_name;                    // lowercase name
+    const char * upper_name;                    // uppercase name
     size_t word_count;                          // number of words in hash output
     void (*f)(ft_ssl_context_t *, FILE * file); // hash function
 } ft_ssl_algorithm_t;

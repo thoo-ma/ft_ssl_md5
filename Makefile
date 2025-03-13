@@ -55,4 +55,7 @@ test_sha256: all
 tidy:
 	clang-tidy -header-filter=.* $(SRCS) -- $(CFLAGS)
 
-.PHONY: all clean fclean re test test_md5 test_sha256 debug tidy
+format:
+	@clang-format -i $(SRCS) $(HEADERS)
+
+.PHONY: all clean fclean re test test_md5 test_sha256 debug tidy format

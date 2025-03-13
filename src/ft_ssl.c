@@ -1,22 +1,21 @@
-#include <errno.h>
 #include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <errno.h>
 #include <getopt.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
+#include "ft_ssl.h"
 #include "md5.h"
 #include "sha256.h"
-#include "ft_ssl.h"
 
 static const ft_ssl_algorithm_t algorithms[] = {
-    {"md5",    "MD5",    4, md5},
+    {"md5", "MD5", 4, md5},
     {"sha256", "SHA256", 8, sha256},
-    {NULL, NULL, 0, NULL}
-};
+    {NULL, NULL, 0, NULL}};
 
 static void __attribute__((unused)) print_context(ft_ssl_context_t * context) {
     printf("hash type: %s\n", ((ft_ssl_algorithm_t *)context->entry.data)->lower_name);
@@ -27,27 +26,27 @@ static void __attribute__((unused)) print_context(ft_ssl_context_t * context) {
     printf("chunk: %s\n", (char *)context->chunk);
 }
 
-static void print_usage(const char *prog_name) {
+static void print_usage(const char * prog_name) {
     fprintf(stderr, "Usage: %s [md5|sha256] [-p] [-q] [-r] [-s string] [file...]\n", prog_name);
 }
 
-static void print_missing_argument(const char *prog_name) {
+static void print_missing_argument(const char * prog_name) {
     fprintf(stderr, "%s: option -s requires an argument\n", prog_name);
 }
 
-static void exit_error(void (*f)(const char *), const char *prog_name) {
+static void exit_error(void (*f)(const char *), const char * prog_name) {
     f(prog_name);
     exit(EXIT_FAILURE);
 }
 
-static void print_hash(ft_ssl_context_t *context) {
+static void print_hash(ft_ssl_context_t * context) {
     for (size_t i = 0; i < ((ft_ssl_algorithm_t *)context->entry.data)->word_count; i++)
         printf("%08x", context->hash[i]);
 }
 
-static void ft_ssl_print(ft_ssl_context_t *context, FILE * file) {
+static void ft_ssl_print(ft_ssl_context_t * context, FILE * file) {
 
-    // when reading from stdin, flag -p disable flags -q and -r   
+    // when reading from stdin, flag -p disable flags -q and -r
     if (file == stdin && IS_OPTION_P(context->options)) {
         print_hash(context);
         printf("\n");
@@ -86,8 +85,8 @@ static void ft_ssl_print(ft_ssl_context_t *context, FILE * file) {
     printf("\n");
 }
 
-static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)(uint8_t *, size_t *, size_t), void (*update)(uint8_t *, size_t, uint32_t *)) {
-    
+static void process_input(ft_ssl_context_t * context, FILE * file, void (*padding)(uint8_t *, size_t *, size_t), void (*update)(uint8_t *, size_t, uint32_t *)) {
+
     if (file == stdin && IS_OPTION_P(context->options))
         write(1, "(\"", 2);
 
@@ -134,20 +133,20 @@ static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)
         write(1, "\")= ", 4);
 }
 
-void sha256(ft_ssl_context_t *context, FILE *file) {
+void sha256(ft_ssl_context_t * context, FILE * file) {
     sha256_init(context->hash);
     process_input(context, file, sha256_padding, sha256_update);
     ft_ssl_print(context, file);
 }
 
-void md5(ft_ssl_context_t *context, FILE *file) {
+void md5(ft_ssl_context_t * context, FILE * file) {
     md5_init(context->hash);
     process_input(context, file, md5_padding, md5_update);
     md5_final(context->hash);
     ft_ssl_print(context, file);
 }
 
-static void ft_ssl_init(ft_ssl_context_t *context, int ac, char **av) {
+static void ft_ssl_init(ft_ssl_context_t * context, int ac, char ** av) {
 
     if (ac < 2)
         exit_error(print_usage, av[0]);
@@ -170,7 +169,7 @@ static void ft_ssl_init(ft_ssl_context_t *context, int ac, char **av) {
 
     // Check if the hash type is valid
     item.key = av[optind];
-    ENTRY *item_found = hsearch(item, FIND);
+    ENTRY * item_found = hsearch(item, FIND);
     if (!item_found)
         exit_error(print_usage, av[0]);
 
@@ -200,7 +199,8 @@ static void ft_ssl_init(ft_ssl_context_t *context, int ac, char **av) {
                     exit_error(print_missing_argument, av[0]);
                 context->p_message = optarg;
                 break;
-            default: exit_error(print_usage, av[0]);
+            default:
+                exit_error(print_usage, av[0]);
         }
     }
 }
@@ -222,7 +222,7 @@ int main(int ac, char ** av) {
         context.filename = NULL;
 
         // Open from memory
-        FILE *file = fmemopen((void *)context.p_message, strlen(context.p_message), "rb");
+        FILE * file = fmemopen((void *)context.p_message, strlen(context.p_message), "rb");
         if (!file)
             exit_error(perror, "fmemopen");
 
@@ -243,7 +243,7 @@ int main(int ac, char ** av) {
             context.p_message = NULL;
 
             // Open from file
-            FILE *file = fopen(av[i], "rb");
+            FILE * file = fopen(av[i], "rb");
             if (!file) {
                 printf("ft_ssl: %s: %s: %s\n", ((ft_ssl_algorithm_t *)context.entry.data)->lower_name, av[i], strerror(errno));
                 continue;
