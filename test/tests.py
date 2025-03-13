@@ -49,7 +49,7 @@ def test_file():
         os.remove("file")
 
 
-class TestFtSsl:
+class TestComparisonWithOpenSSL:
     
     @pytest.mark.parametrize("filename", TEST_FILES)
     def test_file_input(self, tester: FtSslTester, filename: str):
@@ -78,6 +78,9 @@ class TestFtSsl:
         openssl_output = tester.run_command(f"openssl {tester.algorithm} {files}")
         ft_ssl_output = tester.run_command(f"{tester.ft_ssl_path} {tester.algorithm} {files}")
         assert ft_ssl_output == openssl_output, "Multiple files test failed"
+
+
+class TestSubjectCases:
     
     def test_stdin_basic(self, tester: FtSslTester):
         """Test basic stdin input."""
