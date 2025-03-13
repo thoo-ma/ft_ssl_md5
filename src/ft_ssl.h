@@ -55,9 +55,3 @@ typedef struct {
 
 void md5(ft_ssl_context_t * context, FILE * file);
 void sha256(ft_ssl_context_t * context, FILE * file);
-
-// type
-// - context
-// - padding
-// - update
-// - final

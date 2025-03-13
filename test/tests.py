@@ -3,6 +3,7 @@ import sys
 import subprocess
 import pytest
 
+
 TEST_FILES = [
     "./input/0.txt",
     "./input/1.txt",
