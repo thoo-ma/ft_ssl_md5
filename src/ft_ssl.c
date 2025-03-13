@@ -92,7 +92,7 @@ static void process_input(ft_ssl_context_t *context, FILE *file, void (*padding)
         write(1, "(\"", 2);
 
     size_t read_bytes = 0;
-    int was_full_chunk = 0;
+    bool was_full_chunk = false;
 
     while ((read_bytes = fread(context->chunk, 1, CHUNK_SIZE_READ, file)) > 0) {
         context->chunk_size = read_bytes;
