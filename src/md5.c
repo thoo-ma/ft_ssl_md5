@@ -82,7 +82,10 @@ void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t has
     for (size_t i = 0; i < chunk_size; i += 64)
     {
         // break chunk into sixteen 32-bit words
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wcast-align"
         uint32_t * w = (uint32_t*)(chunk + i);
+        #pragma GCC diagnostic pop
 
         uint32_t a = a0;
         uint32_t b = b0;

@@ -160,8 +160,11 @@ static void ft_ssl_init(ft_ssl_context_t *context, int ac, char **av) {
     // Insert key-function pointer pairs into the hash table
     ENTRY item;
     for (size_t i = 0; i < table_size; i++) {
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wcast-qual"
         item.key = (char *)algorithms[i].lower_name;
         item.data = (ft_ssl_algorithm_t *)&algorithms[i];
+        #pragma GCC diagnostic pop
         hsearch(item, ENTER);
     }
 

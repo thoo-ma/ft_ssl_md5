@@ -1,6 +1,21 @@
 CC = clang
 
-CFLAGS = -Wall -Wextra -Werror -Wconversion
+CFLAGS = -Wall \
+         -Wextra \
+         -Werror \
+         -Wconversion \
+         -Wunreachable-code \
+         -Wformat=2 \
+         -Wcast-qual \
+         -Wcast-align \
+         -Wstrict-aliasing \
+         -Wpointer-arith \
+         -Wshadow \
+         -Wuninitialized \
+         -Wundef \
+         -Wwrite-strings \
+         -Wdouble-promotion \
+         -fstack-protector-strong
 
 SRCS = src/ft_ssl.c src/md5.c src/sha256.c
 
