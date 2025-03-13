@@ -8,20 +8,20 @@
 #define OPTION_R (1 << 2) // 00000100
 #define OPTION_S (1 << 3) // 00001000
 
-#define IS_OPTION_P(options) (options & OPTION_P)
-#define IS_OPTION_Q(options) (options & OPTION_Q)
-#define IS_OPTION_R(options) (options & OPTION_R)
-#define IS_OPTION_S(options) (options & OPTION_S)
+#define IS_OPTION_P(options) ((options) & OPTION_P)
+#define IS_OPTION_Q(options) ((options) & OPTION_Q)
+#define IS_OPTION_R(options) ((options) & OPTION_R)
+#define IS_OPTION_S(options) ((options) & OPTION_S)
 
-#define SET_OPTION_P(options) (options |= OPTION_P)
-#define SET_OPTION_Q(options) (options |= OPTION_Q)
-#define SET_OPTION_R(options) (options |= OPTION_R)
-#define SET_OPTION_S(options) (options |= OPTION_S)
+#define SET_OPTION_P(options) ((options) |= OPTION_P)
+#define SET_OPTION_Q(options) ((options) |= OPTION_Q)
+#define SET_OPTION_R(options) ((options) |= OPTION_R)
+#define SET_OPTION_S(options) ((options) |= OPTION_S)
 
-#define UNSET_OPTION_P(options) (options &= ~OPTION_P)
-#define UNSET_OPTION_Q(options) (options &= ~OPTION_Q)
-#define UNSET_OPTION_R(options) (options &= ~OPTION_R)
-#define UNSET_OPTION_S(options) (options &= ~OPTION_S)
+#define UNSET_OPTION_P(options) ((options) &= ~OPTION_P)
+#define UNSET_OPTION_Q(options) ((options) &= ~OPTION_Q)
+#define UNSET_OPTION_R(options) ((options) &= ~OPTION_R)
+#define UNSET_OPTION_S(options) ((options) &= ~OPTION_S)
 
 /// @brief The size of a block in bytes (64 bytes = 512 bits)
 #define BLOCK_SIZE 64

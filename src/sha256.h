@@ -4,7 +4,7 @@
 
 #include "ft_ssl.h" // for CHUNK_SIZE_TOTAL
 
-#define ROTATE_RIGHT(x, n) ((x >> n) | (x << (32 - n)))
+#define ROTATE_RIGHT(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
 
 #define CH(x, y, z) (((x) & (y)) ^ (~(x) & (z))) //
 #define MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))

@@ -5,7 +5,7 @@
 
 #include "ft_ssl.h" // for CHUNK_SIZE_TOTAL
 
-#define ROTATE_LEFT(x, n) ((x << n) | (x >> (32 - n)))
+#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
 /// @note namespace-like encapsulation
 typedef struct {
