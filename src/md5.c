@@ -78,6 +78,7 @@ void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t has
 
     // process the message in successive 512-bit chunks
     for (size_t i = 0; i < chunk_size; i += 64) {
+
         // break chunk into sixteen 32-bit words
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wcast-align"
