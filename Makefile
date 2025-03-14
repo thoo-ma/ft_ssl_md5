@@ -15,7 +15,8 @@ CFLAGS = -Wall \
          -Wundef \
          -Wwrite-strings \
          -Wdouble-promotion \
-         -fstack-protector-strong
+         -fstack-protector-strong \
+		 -O2
 
 SRCS = src/ft_ssl.c src/md5.c src/sha256.c
 
