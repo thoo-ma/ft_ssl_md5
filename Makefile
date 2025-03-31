@@ -35,7 +35,7 @@ $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	$(RM) $(NAME) $(OBJS)
+	$(RM) $(OBJS)
 
 fclean: clean
 	$(RM) $(NAME)
@@ -59,4 +59,18 @@ tidy:
 format:
 	@clang-format -i $(SRCS) $(HEADERS)
 
-.PHONY: all clean fclean re test test_md5 test_sha256 debug tidy format
+help:
+	@echo "Available targets:"
+	@echo "  all       : Build the ft_ssl binary (default)"
+	@echo "  clean     : Remove object files"
+	@echo "  fclean    : Remove binary and object files"
+	@echo "  re        : Rebuild the project"
+	@echo "  debug     : Build with debug symbols"
+	@echo "  test      : Run all tests"
+	@echo "  test_md5  : Run MD5 tests"
+	@echo "  test_sha256: Run SHA-256 tests"
+	@echo "  tidy      : Check code with clang-tidy"
+	@echo "  format    : Format code with clang-format"
+	@echo "  help      : Show this help message"
+
+.PHONY: all clean fclean re test test_md5 test_sha256 debug tidy format help
