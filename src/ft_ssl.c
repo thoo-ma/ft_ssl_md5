@@ -39,7 +39,6 @@ static void exit_error(void (*f)(const char *), const char * prog_name) {
     exit(EXIT_FAILURE);
 }
 
-
 static void ft_ssl_init(ft_ssl_context_t * context, int ac, char ** av) {
 
     if (ac < 2)

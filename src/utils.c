@@ -1,7 +1,6 @@
 #include "utils.h"
 #include <stdio.h>
 
-
 static void print_hash(ft_ssl_context_t * context) {
     for (size_t i = 0; i < ((ft_ssl_algorithm_t *)context->entry.data)->word_count; i++)
         printf("%08x", context->hash[i]);
