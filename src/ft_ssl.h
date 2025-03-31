@@ -2,6 +2,7 @@
 
 #include <search.h> // for ENTRY
 #include <stdio.h>  // for FILE
+#include <stdint.h> // for uint32_t, uint8_t
 
 /// @brief Option flags for the ft_ssl command
 #define OPTION_P (1 << 0) // Print input (echo mode)
