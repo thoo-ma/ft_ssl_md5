@@ -8,15 +8,16 @@
 
 #include "ft_ssl.h"
 #include "md5.h"
+#include "utils.h"
 
-void md5_init(uint32_t hash[4]) {
+static void md5_init(uint32_t hash[4]) {
     hash[0] = md5_context.h0;
     hash[1] = md5_context.h1;
     hash[2] = md5_context.h2;
     hash[3] = md5_context.h3;
 }
 
-void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
+static void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
     #ifdef DEBUG
     fprintf(stderr, "GO pad\n");
     fprintf(stderr, "chunk_size: %lu\n", *chunk_size);
@@ -54,7 +55,7 @@ void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t me
 }
 
 /// @brief Reverse the byte order of each 32-bit word in the hash.
-void md5_final(uint32_t hash[4]) {
+static void md5_final(uint32_t hash[4]) {
     hash[0] = ((hash[0] & 0xff) << 24) | ((hash[0] & 0xff00) << 8) |
               ((hash[0] & 0xff0000) >> 8) | ((hash[0] & 0xff000000) >> 24);
     hash[1] = ((hash[1] & 0xff) << 24) | ((hash[1] & 0xff00) << 8) |
@@ -65,7 +66,7 @@ void md5_final(uint32_t hash[4]) {
               ((hash[3] & 0xff0000) >> 8) | ((hash[3] & 0xff000000) >> 24);
 }
 
-void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t hash[4]) {
+static void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t hash[4]) {
 
     // initialize the hash values
     uint32_t a0 = hash[0];
@@ -127,4 +128,11 @@ void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t has
     hash[1] = b0;
     hash[2] = c0;
     hash[3] = d0;
+}
+
+void md5(ft_ssl_context_t * context, FILE * file) {
+    md5_init(context->hash);
+    process_input(context, file, md5_padding, md5_update);
+    md5_final(context->hash);
+    ft_ssl_print(context, file);
 }

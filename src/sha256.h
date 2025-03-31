@@ -47,6 +47,4 @@ static sha256_context_t sha256_context = {
     }
 };
 
-void sha256_init(uint32_t hash[8]);
-void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size);
-void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t hash[8]);
+void sha256(ft_ssl_context_t * context, FILE * file);

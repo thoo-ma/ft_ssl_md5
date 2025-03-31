@@ -48,7 +48,4 @@ static const md5_context_t md5_context = {
     }
 };
 
-void md5_init(uint32_t hash[4]);
-void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size);
-void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t hash[4]);
-void md5_final(uint32_t hash[4]);
+void md5(ft_ssl_context_t * context, FILE * file);

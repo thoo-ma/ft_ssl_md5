@@ -18,9 +18,9 @@ CFLAGS = -Wall \
          -fstack-protector-strong \
 		 -O2
 
-SRCS = src/ft_ssl.c src/md5.c src/sha256.c
+SRCS = src/ft_ssl.c src/md5.c src/sha256.c src/utils.c
 
-HEADERS = src/ft_ssl.h src/md5.h src/sha256.h
+HEADERS = src/ft_ssl.h src/md5.h src/sha256.h src/utils.h
 
 OBJS = $(SRCS:.c=.o)
 

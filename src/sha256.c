@@ -8,8 +8,9 @@
 
 #include "ft_ssl.h"
 #include "sha256.h"
+#include "utils.h"
 
-void sha256_init(uint32_t hash[8]) {
+static void sha256_init(uint32_t hash[8]) {
     hash[0] = sha256_context.h0;
     hash[1] = sha256_context.h1;
     hash[2] = sha256_context.h2;
@@ -20,7 +21,7 @@ void sha256_init(uint32_t hash[8]) {
     hash[7] = sha256_context.h7;
 }
 
-void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
+static void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
     #ifdef DEBUG
     fprintf(stderr, "GO pad\n");
     fprintf(stderr, "chunk_size: %lu\n", *chunk_size);
@@ -58,7 +59,7 @@ void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t
     #endif
 }
 
-void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t hash[8]) {
+static void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t hash[8]) {
 
     // Load the state
     uint32_t a0 = hash[0];
@@ -128,4 +129,10 @@ void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t 
     hash[5] = f0;
     hash[6] = g0;
     hash[7] = h0;
+}
+
+void sha256(ft_ssl_context_t * context, FILE * file) {
+    sha256_init(context->hash);
+    process_input(context, file, sha256_padding, sha256_update);
+    ft_ssl_print(context, file);
 }
