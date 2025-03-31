@@ -23,17 +23,14 @@ void sha256_init(uint32_t hash[8]) {
 void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
     #ifdef DEBUG
     fprintf(stderr, "GO pad\n");
-    #endif
-
-    // end the '1' bit
-    chunk[*chunk_size] = 0x80;
-
-    #ifdef DEBUG
     fprintf(stderr, "chunk_size: %lu\n", *chunk_size);
     fprintf(stderr, "message_size: %lu\n", message_size);
     #endif
 
-    // append '0' bits to the last 512 bits block of the chunk
+    // Append the bit '1' to the message
+    chunk[*chunk_size] = 0x80;
+
+    // Append '0' bits to the last 512 bits block of the chunk
     size_t block_index = (*chunk_size + 1) / 64;
     size_t zeros = 64 * (block_index + 1) - *chunk_size - 1 - 8;
 
@@ -49,7 +46,7 @@ void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t
     write(2, "\n", 1);
     #endif
 
-    // append the original size in bits
+    // Append the original size in bits (big-endian)
     size_t bit_size = message_size * 8;
     for (size_t i = 0; i < 8; i++)
         chunk[*chunk_size + 1 + zeros + i] = (bit_size >> (56 - 8 * i)) & 0xFF;

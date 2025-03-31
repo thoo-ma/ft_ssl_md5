@@ -152,7 +152,7 @@ static void ft_ssl_init(ft_ssl_context_t * context, int ac, char ** av) {
         exit_error(print_usage, av[0]);
 
     // Initialize the hash table
-    size_t table_size = 2;
+    size_t table_size = 2; // Number of algorithms
     if (hcreate(table_size) == 0)
         exit_error(perror, "hcreate");
 

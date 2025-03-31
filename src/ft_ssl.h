@@ -3,10 +3,11 @@
 #include <search.h> // for ENTRY
 #include <stdio.h>  // for FILE
 
-#define OPTION_P (1 << 0) // 00000001
-#define OPTION_Q (1 << 1) // 00000010
-#define OPTION_R (1 << 2) // 00000100
-#define OPTION_S (1 << 3) // 00001000
+/// @brief Option flags for the ft_ssl command
+#define OPTION_P (1 << 0) // Print input (echo mode)
+#define OPTION_Q (1 << 1) // Quiet mode
+#define OPTION_R (1 << 2) // Reverse format
+#define OPTION_S (1 << 3) // String input mode
 
 #define IS_OPTION_P(options) ((options) & OPTION_P)
 #define IS_OPTION_Q(options) ((options) & OPTION_Q)
@@ -35,22 +36,24 @@
 /// @brief The total number of 512 bits blocks in a chunk (one extra for padding)
 #define CHUNK_SIZE_TOTAL (CHUNK_SIZE_READ + BLOCK_SIZE)
 
+/// @brief Context for ft_ssl operations
 typedef struct {
-    ENTRY entry;
-    uint32_t hash[8];
-    uint8_t chunk[CHUNK_SIZE_TOTAL];
-    char * filename;
-    char * p_message;
-    size_t message_size;
-    size_t chunk_size;
-    uint8_t options;
+    ENTRY entry;                     ///< Hash table entry for the algorithm
+    uint32_t hash[8];                ///< Hash result buffer (max 8 words needed for SHA-256)
+    uint8_t chunk[CHUNK_SIZE_TOTAL]; ///< Buffer for input data
+    char * filename;                 ///< Input filename
+    char * p_message;                ///< Input message (when using -s option)
+    size_t message_size;             ///< Total message size
+    size_t chunk_size;               ///< Current chunk size
+    uint8_t options;                 ///< Command line options
 } ft_ssl_context_t;
 
+/// @brief Algorithm function pointers structure
 typedef struct {
-    const char * lower_name;                    // lowercase name
-    const char * upper_name;                    // uppercase name
-    size_t word_count;                          // number of words in hash output
-    void (*f)(ft_ssl_context_t *, FILE * file); // hash function
+    const char * lower_name;                    ///< Lowercase name (for command line)
+    const char * upper_name;                    ///< Uppercase name (for output formatting)
+    size_t word_count;                          ///< Number of words in hash output
+    void (*f)(ft_ssl_context_t *, FILE * file); ///< Hash function
 } ft_ssl_algorithm_t;
 
 void md5(ft_ssl_context_t * context, FILE * file);

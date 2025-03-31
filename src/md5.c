@@ -19,15 +19,12 @@ void md5_init(uint32_t hash[4]) {
 void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
     #ifdef DEBUG
     fprintf(stderr, "GO pad\n");
-    #endif
-
-    // end the '1' bit
-    chunk[*chunk_size] = 0x80;
-
-    #ifdef DEBUG
     fprintf(stderr, "chunk_size: %lu\n", *chunk_size);
     fprintf(stderr, "message_size: %lu\n", message_size);
     #endif
+
+    // end with '1' bit
+    chunk[*chunk_size] = 0x80;
 
     // append '0' bits to the last 512 bits block of the chunk
     size_t block_index = (*chunk_size + 1) / 64;
@@ -45,7 +42,7 @@ void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t me
     write(2, "\n", 1);
     #endif
 
-    // append the original size in bits
+    // append the original size in bits (little-endian)
     size_t bit_size = message_size * 8;
     memcpy(chunk + *chunk_size + 1 + zeros, &bit_size, 8);
 
