@@ -1,3 +1,5 @@
+# CONFIGURATION ##################################################################
+
 CC = clang
 
 CFLAGS = -Wall \
@@ -18,6 +20,8 @@ CFLAGS = -Wall \
          -fstack-protector-strong \
 		 -O2
 
+# FILES #########################################################################
+
 SRCS = src/ft_ssl.c src/md5.c src/sha256.c src/utils.c
 
 HEADERS = src/ft_ssl.h src/md5.h src/sha256.h src/utils.h
@@ -25,6 +29,8 @@ HEADERS = src/ft_ssl.h src/md5.h src/sha256.h src/utils.h
 OBJS = $(SRCS:.c=.o)
 
 NAME = ft_ssl
+
+# MAIN TARGETS ##################################################################
 
 all: $(NAME)
 
@@ -34,6 +40,8 @@ $(NAME): $(OBJS)
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# CLEANING ######################################################################
+
 clean:
 	$(RM) $(OBJS)
 
@@ -42,8 +50,18 @@ fclean: clean
 
 re: fclean all
 
+# DEVELOPMENT TARGETS ###########################################################
+
 debug: CFLAGS += -DDEBUG
 debug: re
+
+format:
+	@clang-format -i $(SRCS) $(HEADERS)
+
+tidy:
+	clang-tidy -header-filter=.* $(SRCS) -- $(CFLAGS)
+
+# TESTING #######################################################################
 
 venv:
 	@if [ ! -d "test/.venv" ]; then \
@@ -60,11 +78,7 @@ test_md5: all venv
 test_sha256: all venv
 	@cd test && .venv/bin/python -m pytest -v tests.py --algorithm=sha256
 
-tidy:
-	clang-tidy -header-filter=.* $(SRCS) -- $(CFLAGS)
-
-format:
-	@clang-format -i $(SRCS) $(HEADERS)
+# HELP ##########################################################################
 
 help:
 	@echo "Available targets:"
