@@ -46,9 +46,11 @@ debug: CFLAGS += -DDEBUG
 debug: re
 
 venv:
-	python -m venv test/.venv
-	./test/.venv/bin/python -m pip install --upgrade pip
-	./test/.venv/bin/pip install -r test/requirements.txt
+	@if [ ! -d "test/.venv" ]; then \
+		python -m venv test/.venv; \
+		./test/.venv/bin/python -m pip install --upgrade pip; \
+		./test/.venv/bin/pip install -r test/requirements.txt; \
+	fi
 
 test: test_md5 test_sha256
 
