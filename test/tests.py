@@ -126,10 +126,10 @@ class TestSubjectCases:
         hash_foo = tester.get_hash("foo")
         expected = f"{tester.algorithm.upper()}(\"foo\")= {hash_foo}"
 
-        # When running with pytest, the program receives an empty stdin input
+        # NOTE: When running with pytest, the program receives an empty stdin input
         # that it processes before handling the -s option, resulting in two lines of output:
-        # 1. "(stdin)= {hash of empty string}"  - from the empty stdin
-        # 2. "{ALGORITHM}("foo")= {hash_foo}"   - from the -s option
+        # 1. "{ALGORITHM}(stdin)= {hash of empty string}"  - from the empty stdin
+        # 2. "{ALGORITHM}("foo")= {hash_foo}"              - from the -s option
         # We need to extract just the second line which contains the -s option result
         output = tester.run_command(f"{tester.ft_ssl_path} {tester.algorithm} -s foo")
         lines = output.strip().split('\n')
