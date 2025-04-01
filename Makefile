@@ -45,13 +45,18 @@ re: fclean all
 debug: CFLAGS += -DDEBUG
 debug: re
 
+venv:
+	python -m venv test/.venv
+	./test/.venv/bin/python -m pip install --upgrade pip
+	./test/.venv/bin/pip install -r test/requirements.txt
+
 test: test_md5 test_sha256
 
-test_md5: all
-	@cd test && python -m pytest -v tests.py --algorithm=md5
+test_md5: all venv
+	@cd test && .venv/bin/python -m pytest -v tests.py --algorithm=md5
 
-test_sha256: all
-	@cd test && python -m pytest -v tests.py --algorithm=sha256
+test_sha256: all venv
+	@cd test && .venv/bin/python -m pytest -v tests.py --algorithm=sha256
 
 tidy:
 	clang-tidy -header-filter=.* $(SRCS) -- $(CFLAGS)
@@ -66,6 +71,7 @@ help:
 	@echo "  fclean    : Remove binary and object files"
 	@echo "  re        : Rebuild the project"
 	@echo "  debug     : Build with debug symbols"
+	@echo "  venv      : Create a Python virtual environment for tests"
 	@echo "  test      : Run all tests"
 	@echo "  test_md5  : Run MD5 tests"
 	@echo "  test_sha256: Run SHA-256 tests"
@@ -73,4 +79,4 @@ help:
 	@echo "  format    : Format code with clang-format"
 	@echo "  help      : Show this help message"
 
-.PHONY: all clean fclean re test test_md5 test_sha256 debug tidy format help
+.PHONY: all clean fclean re test test_md5 test_sha256 debug tidy format help venv
