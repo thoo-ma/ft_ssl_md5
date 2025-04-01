@@ -10,10 +10,6 @@
 void ft_ssl_print(ft_ssl_context_t * context, FILE * file);
 
 /// @brief Process input data and compute hash
-/// @param context The ft_ssl context
-/// @param file The input file
-/// @param padding Function pointer to the padding algorithm
-/// @param update Function pointer to the hash update algorithm
 void process_input(
     ft_ssl_context_t * context,
     FILE * file,
