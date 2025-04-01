@@ -40,7 +40,7 @@ void ft_ssl_print(ft_ssl_context_t * context, FILE * file) {
         }
         // Don't print anything here as the (stdin)= part is already printed by process_input
     } else {
-        printf("(stdin)= ");
+        printf("%s(stdin)= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name);
     }
 
     print_hash(context);

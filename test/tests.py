@@ -83,10 +83,13 @@ class TestComparisonWithOpenSSL:
 
 class TestSubjectCases:
     
+    # NOTE: We're testing against "{algorithm.upper()}(stdin)=" format rather than
+    # just "(stdin)=" (which is mentioned in the subject) to match the format
+    # of the openssl version installed on school computers.
     def test_stdin_basic(self, tester: FtSslTester):
         """Test basic stdin input."""
         hash_foo = tester.get_hash("foo")
-        expected = f"(stdin)= {hash_foo}"
+        expected = f"{tester.algorithm.upper()}(stdin)= {hash_foo}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm}")
         assert actual == expected, "Basic stdin test failed"
 
