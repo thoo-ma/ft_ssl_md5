@@ -56,6 +56,3 @@ typedef struct {
     size_t word_count;                          ///< Number of words in hash output
     void (*f)(ft_ssl_context_t *, FILE * file); ///< Hash function
 } ft_ssl_algorithm_t;
-
-void md5(ft_ssl_context_t * context, FILE * file);
-void sha256(ft_ssl_context_t * context, FILE * file);
