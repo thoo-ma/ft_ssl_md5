@@ -2,7 +2,7 @@
 
 ## Overview
 
-This program mirrors `openssl` output format.  
+This program mirrors `openssl` output format (OpenSSL 1.1.1f  31 Mar 2020).
 Only difference with the subject is the last test case since it doesn't make sense to me.
 
 ## Documentation
