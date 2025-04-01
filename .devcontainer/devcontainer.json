@@ -1,0 +1,16 @@
+{
+    "name": "ft_ssl_md5 Development",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-python.python",
+                "ms-vscode.makefile-tools"
+            ]
+        }
+    }
+}
