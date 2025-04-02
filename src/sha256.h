@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "ft_ssl.h" // for CHUNK_SIZE_TOTAL
+#include "ft_ssl.h" // for ft_ssl_context_t
 
 #define ROTATE_RIGHT(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
 
