@@ -13,7 +13,7 @@ static void md5_init(uint32_t hash[4]) {
     hash[3] = md5_context.h3;
 }
 
-static void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
+static void md5_pad(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
 
     // end with '1' bit
     chunk[*chunk_size] = 0x80;
@@ -109,7 +109,7 @@ static void md5_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint3
 
 void md5(ft_ssl_context_t * context, FILE * file) {
     md5_init(context->hash);
-    process_input(context, file, md5_padding, md5_update);
+    process_input(context, file, md5_pad, md5_update);
     md5_final(context->hash);
     ft_ssl_print(context, file);
 }

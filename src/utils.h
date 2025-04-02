@@ -13,6 +13,6 @@ void ft_ssl_print(ft_ssl_context_t * context, FILE * file);
 void process_input(
     ft_ssl_context_t * context,
     FILE * file,
-    void (*padding)(uint8_t *, size_t *, size_t),
+    void (*pad)(uint8_t *, size_t *, size_t),
     void (*update)(uint8_t *, size_t, uint32_t *)
 );

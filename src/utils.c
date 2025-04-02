@@ -47,7 +47,7 @@ void ft_ssl_print(ft_ssl_context_t * context, FILE * file) {
     printf("\n");
 }
 
-void process_input(ft_ssl_context_t * context, FILE * file, void (*padding)(uint8_t *, size_t *, size_t), void (*update)(uint8_t *, size_t, uint32_t *)) {
+void process_input(ft_ssl_context_t * context, FILE * file, void (*pad)(uint8_t *, size_t *, size_t), void (*update)(uint8_t *, size_t, uint32_t *)) {
 
     if (file == stdin && IS_OPTION_P(context->options))
         write(1, "(\"", 2);
@@ -62,7 +62,7 @@ void process_input(ft_ssl_context_t * context, FILE * file, void (*padding)(uint
 
         if (read_bytes < CHUNK_SIZE_READ) {
             // last chunk -> do final padding
-            padding(context->chunk, &context->chunk_size, context->message_size);
+            pad(context->chunk, &context->chunk_size, context->message_size);
             update(context->chunk, context->chunk_size, context->hash);
         } else {
             // If reading from stdin, just process the chunk
@@ -71,7 +71,7 @@ void process_input(ft_ssl_context_t * context, FILE * file, void (*padding)(uint
             } else {
                 // For regular files, we can safely check for EOF
                 if (fgetc(file) == EOF) {
-                    padding(context->chunk, &context->chunk_size, context->message_size);
+                    pad(context->chunk, &context->chunk_size, context->message_size);
                     update(context->chunk, context->chunk_size, context->hash);
                 } else {
                     fseek(file, -1, SEEK_CUR);
@@ -87,7 +87,7 @@ void process_input(ft_ssl_context_t * context, FILE * file, void (*padding)(uint
     // Handle empty stream or final padding for stdin
     if (context->message_size == 0 || (file == stdin && was_full_chunk)) {
         context->chunk_size = 0;
-        padding(context->chunk, &context->chunk_size, context->message_size);
+        pad(context->chunk, &context->chunk_size, context->message_size);
         update(context->chunk, context->chunk_size, context->hash);
     }
 

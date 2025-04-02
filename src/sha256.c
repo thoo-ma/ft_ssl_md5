@@ -17,7 +17,7 @@ static void sha256_init(uint32_t hash[8]) {
     hash[7] = sha256_context.h7;
 }
 
-static void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
+static void sha256_pad(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
 
     // Append the bit '1' to the message
     chunk[*chunk_size] = 0x80;
@@ -110,6 +110,6 @@ static void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, ui
 
 void sha256(ft_ssl_context_t * context, FILE * file) {
     sha256_init(context->hash);
-    process_input(context, file, sha256_padding, sha256_update);
+    process_input(context, file, sha256_pad, sha256_update);
     ft_ssl_print(context, file);
 }
