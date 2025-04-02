@@ -45,8 +45,9 @@ $(NAME): $(OBJS)
 clean:
 	$(RM) $(OBJS)
 
-fclean: clean
-	$(RM) $(NAME)
+fclean:
+	$(RM) $(OBJS) $(NAME)
+	rm -rf test/.venv
 
 re: fclean all
 
