@@ -48,15 +48,20 @@ static void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, ui
     uint32_t g0 = hash[6];
     uint32_t h0 = hash[7];
 
-    // process the message in successive 512-bit chunks
+    // Process each 512-bit chunk
     for (size_t i = 0; i < chunk_size; i += 64) {
-
-        // prepare the message schedule
         uint32_t w[64] = {0};
 
-        for (uint8_t j = 0; j < 16; j++)
-            w[j] = (uint32_t)(chunk[i + j * 4] << 24) | (uint32_t)(chunk[i + j * 4 + 1] << 16) | (uint32_t)(chunk[i + j * 4 + 2] << 8) | (uint32_t)(chunk[i + j * 4 + 3]);
+        // Convert bytes to words (big-endian)
+        for (uint8_t j = 0; j < 16; j++) {
+            const size_t offset = i + j * 4;
+            w[j] = ((uint32_t)chunk[offset] << 24) |
+                   ((uint32_t)chunk[offset + 1] << 16) |
+                   ((uint32_t)chunk[offset + 2] << 8) |
+                   ((uint32_t)chunk[offset + 3]);
+        }
 
+        // Extend the first 16 words to the remaining 48 words
         for (uint8_t j = 16; j < 64; j++)
             w[j] = SSIG1(w[j - 2]) + w[j - 7] + SSIG0(w[j - 15]) + w[j - 16];
 
@@ -70,7 +75,7 @@ static void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, ui
         uint32_t g = g0;
         uint32_t h = h0;
 
-        // main loop
+        // Compression function main loop
         for (uint8_t j = 0; j < 64; j++) {
 
             uint32_t t1 = h + BSIG1(e) + CH(e, f, g) + sha256_context.k[j] + w[j];
@@ -86,7 +91,7 @@ static void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, ui
             a = t1 + t2;
         }
 
-        // compute the intermediate hash value
+        // Compute the intermediate hash value
         a0 += a;
         b0 += b;
         c0 += c;

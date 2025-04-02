@@ -8,7 +8,7 @@ static void print_hash(ft_ssl_context_t * context) {
 
 void ft_ssl_print(ft_ssl_context_t * context, FILE * file) {
 
-    // when reading from stdin, flag -p disable flags -q and -r
+    // When reading from stdin, flag -p disable flags -q and -r
     if (file == stdin && IS_OPTION_P(context->options)) {
         print_hash(context);
         printf("\n");
@@ -61,7 +61,7 @@ void process_input(ft_ssl_context_t * context, FILE * file, void (*pad)(uint8_t 
         was_full_chunk = (read_bytes == CHUNK_SIZE_READ);
 
         if (read_bytes < CHUNK_SIZE_READ) {
-            // last chunk -> do final padding
+            // Last chunk: do final padding
             pad(context->chunk, &context->chunk_size, context->message_size);
             update(context->chunk, context->chunk_size, context->hash);
         } else {
