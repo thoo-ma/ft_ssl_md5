@@ -13,26 +13,10 @@
 
 /// @note namespace-like encapsulation
 typedef struct {
-    uint32_t h0;
-    uint32_t h1;
-    uint32_t h2;
-    uint32_t h3;
-    uint32_t h4;
-    uint32_t h5;
-    uint32_t h6;
-    uint32_t h7;
     uint32_t k[64];
 } sha256_context_t;
 
 static sha256_context_t sha256_context = {
-    .h0 = 0x6a09e667,
-    .h1 = 0xbb67ae85,
-    .h2 = 0x3c6ef372,
-    .h3 = 0xa54ff53a,
-    .h4 = 0x510e527f,
-    .h5 = 0x9b05688c,
-    .h6 = 0x1f83d9ab,
-    .h7 = 0x5be0cd19,
     .k = {
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
         0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,

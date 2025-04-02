@@ -7,14 +7,14 @@
 #include "utils.h"
 
 static void sha256_init(uint32_t hash[8]) {
-    hash[0] = sha256_context.h0;
-    hash[1] = sha256_context.h1;
-    hash[2] = sha256_context.h2;
-    hash[3] = sha256_context.h3;
-    hash[4] = sha256_context.h4;
-    hash[5] = sha256_context.h5;
-    hash[6] = sha256_context.h6;
-    hash[7] = sha256_context.h7;
+    hash[0] = 0x6a09e667;
+    hash[1] = 0xbb67ae85;
+    hash[2] = 0x3c6ef372;
+    hash[3] = 0xa54ff53a;
+    hash[4] = 0x510e527f;
+    hash[5] = 0x9b05688c;
+    hash[6] = 0x1f83d9ab;
+    hash[7] = 0x5be0cd19;
 }
 
 static void sha256_pad(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
