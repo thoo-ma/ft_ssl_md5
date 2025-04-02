@@ -15,7 +15,7 @@ static void md5_init(uint32_t hash[4]) {
 
 static void md5_pad(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
 
-    // end with '1' bit
+    // add the '1' bit
     chunk[*chunk_size] = 0x80;
 
     // append '0' bits to the last 512 bits block of the chunk
