@@ -50,10 +50,7 @@ fclean: clean
 
 re: fclean all
 
-# DEVELOPMENT TARGETS ###########################################################
-
-debug: CFLAGS += -DDEBUG
-debug: re
+# CODE QUALITY ##################################################################
 
 format:
 	@clang-format -i $(SRCS) $(HEADERS)
@@ -86,7 +83,6 @@ help:
 	@echo "  clean ...... Remove object files"
 	@echo "  fclean ..... Remove binary and object files"
 	@echo "  re ......... Rebuild the project"
-	@echo "  debug ...... Build with debug symbols"
 	@echo "  venv ....... Create a Python virtual environment for tests"
 	@echo "  test ....... Run all tests"
 	@echo "  test_md5 ... Run MD5 tests"
@@ -95,4 +91,4 @@ help:
 	@echo "  format ..... Format code with clang-format"
 	@echo "  help ....... Show this help message"
 
-.PHONY: all clean fclean re test test_md5 test_sha256 debug tidy format help venv
+.PHONY: all clean fclean re test test_md5 test_sha256 tidy format help venv

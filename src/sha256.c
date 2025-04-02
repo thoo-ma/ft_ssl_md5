@@ -1,10 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef DEBUG
-#include <stdio.h>
-#include <unistd.h>
-#endif
 
 #include "ft_ssl.h"
 #include "sha256.h"
@@ -22,11 +18,6 @@ static void sha256_init(uint32_t hash[8]) {
 }
 
 static void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
-    #ifdef DEBUG
-    fprintf(stderr, "GO pad\n");
-    fprintf(stderr, "chunk_size: %lu\n", *chunk_size);
-    fprintf(stderr, "message_size: %lu\n", message_size);
-    #endif
 
     // Append the bit '1' to the message
     chunk[*chunk_size] = 0x80;
@@ -35,17 +26,7 @@ static void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size,
     size_t block_index = (*chunk_size + 1) / 64;
     size_t zeros = 64 * (block_index + 1) - *chunk_size - 1 - 8;
 
-    #ifdef DEBUG
-    fprintf(stderr, "block_index: %lu\n", block_index);
-    fprintf(stderr, "zeros: %lu\n", zeros);
-    #endif
-
     memset(chunk + *chunk_size + 1, 0, zeros);
-
-    #ifdef DEBUG
-    write(2, chunk, *chunk_size);
-    write(2, "\n", 1);
-    #endif
 
     // Append the original size in bits (big-endian)
     size_t bit_size = message_size * 8;
@@ -53,10 +34,6 @@ static void sha256_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size,
         chunk[*chunk_size + 1 + zeros + i] = (bit_size >> (56 - 8 * i)) & 0xFF;
 
     *chunk_size = 64 * (block_index + 1);
-
-    #ifdef DEBUG
-    fprintf(stderr, "__ chunk_size: %lu\n", *chunk_size);
-    #endif
 }
 
 static void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t hash[8]) {

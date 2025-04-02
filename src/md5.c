@@ -1,10 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef DEBUG
-#include <stdio.h>
-#include <unistd.h>
-#endif
 
 #include "ft_ssl.h"
 #include "md5.h"
@@ -18,11 +14,6 @@ static void md5_init(uint32_t hash[4]) {
 }
 
 static void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t message_size) {
-    #ifdef DEBUG
-    fprintf(stderr, "GO pad\n");
-    fprintf(stderr, "chunk_size: %lu\n", *chunk_size);
-    fprintf(stderr, "message_size: %lu\n", message_size);
-    #endif
 
     // end with '1' bit
     chunk[*chunk_size] = 0x80;
@@ -31,27 +22,13 @@ static void md5_padding(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, si
     size_t block_index = (*chunk_size + 1) / 64;
     size_t zeros = 64 * (block_index + 1) - *chunk_size - 1 - 8;
 
-    #ifdef DEBUG
-    fprintf(stderr, "block_index: %lu\n", block_index);
-    fprintf(stderr, "zeros: %lu\n", zeros);
-    #endif
-
     memset(chunk + *chunk_size + 1, 0, zeros);
-
-    #ifdef DEBUG
-    write(2, chunk, *chunk_size);
-    write(2, "\n", 1);
-    #endif
 
     // append the original size in bits (little-endian)
     size_t bit_size = message_size * 8;
     memcpy(chunk + *chunk_size + 1 + zeros, &bit_size, 8);
 
     *chunk_size = 64 * (block_index + 1);
-
-    #ifdef DEBUG
-    fprintf(stderr, "__ chunk_size: %lu\n", *chunk_size);
-    #endif
 }
 
 /// @brief Reverse the byte order of each 32-bit word in the hash.
