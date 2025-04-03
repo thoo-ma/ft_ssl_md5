@@ -12,7 +12,7 @@
 #include "md5.h"
 #include "sha256.h"
 
-static const ft_ssl_algorithm_t algorithms[] = {
+static const ft_ssl_algorithm_t ft_ssl_algorithms[] = {
     {"md5", "MD5", 4, md5},
     {"sha256", "SHA256", 8, sha256},
     {NULL, NULL, 0, NULL}
@@ -46,8 +46,8 @@ static void ft_ssl_init(ft_ssl_context_t * context, int ac, char ** av) {
     for (size_t i = 0; i < table_size; i++) {
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wcast-qual"
-        item.key = (char *)algorithms[i].lower_name;
-        item.data = (ft_ssl_algorithm_t *)&algorithms[i];
+        item.key = (char *)ft_ssl_algorithms[i].lower_name;
+        item.data = (ft_ssl_algorithm_t *)&ft_ssl_algorithms[i];
         #pragma GCC diagnostic pop
         hsearch(item, ENTER);
     }
