@@ -53,37 +53,27 @@ void process_input(ft_ssl_context_t * context, FILE * file, void (*pad)(uint8_t 
         write(1, "(\"", 2);
 
     size_t read_bytes = 0;
-    bool need_final_update = false;
+    bool padding_done = false;
 
+    // Process all input in chunks
     while ((read_bytes = fread(context->chunk, 1, CHUNK_SIZE_READ, file)) > 0) {
         context->chunk_size = read_bytes;
         context->message_size += read_bytes;
-        need_final_update = (read_bytes == CHUNK_SIZE_READ);
-
-        if (read_bytes < CHUNK_SIZE_READ) {
-            // Last chunk: do final padding
-            pad(context->chunk, &context->chunk_size, context->message_size);
-            update(context->chunk, context->chunk_size, context->hash);
-        } else if (file == stdin) {
-            // If reading from stdin, just process the chunk
-            update(context->chunk, context->chunk_size, context->hash);
-        } else {
-            // For regular files, we can safely check for EOF
-            if (fgetc(file) == EOF) {
-                pad(context->chunk, &context->chunk_size, context->message_size);
-                update(context->chunk, context->chunk_size, context->hash);
-            } else {
-                fseek(file, -1, SEEK_CUR);
-                update(context->chunk, context->chunk_size, context->hash);
-            }
-        }
-
+        
         if (file == stdin && IS_OPTION_P(context->options))
             write(1, context->chunk, read_bytes);
+        
+        // Apply padding if this is the final chunk
+        if (read_bytes < CHUNK_SIZE_READ || (file != stdin && feof(file))) {
+            pad(context->chunk, &context->chunk_size, context->message_size);
+            padding_done = true;
+        }
+        
+        update(context->chunk, context->chunk_size, context->hash);
     }
 
-    // Handle empty stream or final padding for stdin
-    if (context->message_size == 0 || (file == stdin && need_final_update)) {
+    // Handle empty files or final padding for files where we didn't hit EOF
+    if (!padding_done) {
         context->chunk_size = 0;
         pad(context->chunk, &context->chunk_size, context->message_size);
         update(context->chunk, context->chunk_size, context->hash);
