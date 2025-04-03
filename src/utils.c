@@ -53,12 +53,12 @@ void process_input(ft_ssl_context_t * context, FILE * file, void (*pad)(uint8_t 
         write(1, "(\"", 2);
 
     size_t read_bytes = 0;
-    bool was_full_chunk = false;
+    bool need_final_update = false;
 
     while ((read_bytes = fread(context->chunk, 1, CHUNK_SIZE_READ, file)) > 0) {
         context->chunk_size = read_bytes;
         context->message_size += read_bytes;
-        was_full_chunk = (read_bytes == CHUNK_SIZE_READ);
+        need_final_update = (read_bytes == CHUNK_SIZE_READ);
 
         if (read_bytes < CHUNK_SIZE_READ) {
             // Last chunk: do final padding
@@ -83,7 +83,7 @@ void process_input(ft_ssl_context_t * context, FILE * file, void (*pad)(uint8_t 
     }
 
     // Handle empty stream or final padding for stdin
-    if (context->message_size == 0 || (file == stdin && was_full_chunk)) {
+    if (context->message_size == 0 || (file == stdin && need_final_update)) {
         context->chunk_size = 0;
         pad(context->chunk, &context->chunk_size, context->message_size);
         update(context->chunk, context->chunk_size, context->hash);
