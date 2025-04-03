@@ -2,10 +2,10 @@
 
 #include "ft_ssl.h" // for ft_ssl_context_t
 
-#define ROTATE_RIGHT(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
+#define ROTATE_RIGHT(a, n) (((a) >> (n)) | ((a) << (32 - (n))))
 
-#define CH(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
-#define MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#define CH(a, b, c) (((a) & (b)) ^ (~(a) & (c)))
+#define MAJ(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
 #define BSIG0(x) (ROTATE_RIGHT(x, 2) ^ ROTATE_RIGHT(x, 13) ^ ROTATE_RIGHT(x, 22))
 #define BSIG1(x) (ROTATE_RIGHT(x, 6) ^ ROTATE_RIGHT(x, 11) ^ ROTATE_RIGHT(x, 25))
 #define SSIG0(x) (ROTATE_RIGHT(x, 7) ^ ROTATE_RIGHT(x, 18) ^ ((x) >> 3))

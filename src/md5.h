@@ -2,7 +2,7 @@
 
 #include "ft_ssl.h" // for ft_ssl_context_t
 
-#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
+#define ROTATE_LEFT(a, n) (((a) << (n)) | ((a) >> (32 - (n))))
 
 #define F(a, b, c) (((a) & (b)) | ((~a) & (c)))
 #define G(a, b, c) (((a) & (c)) | ((b) & (~c)))
