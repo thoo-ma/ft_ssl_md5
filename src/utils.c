@@ -64,19 +64,17 @@ void process_input(ft_ssl_context_t * context, FILE * file, void (*pad)(uint8_t 
             // Last chunk: do final padding
             pad(context->chunk, &context->chunk_size, context->message_size);
             update(context->chunk, context->chunk_size, context->hash);
-        } else {
+        } else if (file == stdin) {
             // If reading from stdin, just process the chunk
-            if (file == stdin) {
+            update(context->chunk, context->chunk_size, context->hash);
+        } else {
+            // For regular files, we can safely check for EOF
+            if (fgetc(file) == EOF) {
+                pad(context->chunk, &context->chunk_size, context->message_size);
                 update(context->chunk, context->chunk_size, context->hash);
             } else {
-                // For regular files, we can safely check for EOF
-                if (fgetc(file) == EOF) {
-                    pad(context->chunk, &context->chunk_size, context->message_size);
-                    update(context->chunk, context->chunk_size, context->hash);
-                } else {
-                    fseek(file, -1, SEEK_CUR);
-                    update(context->chunk, context->chunk_size, context->hash);
-                }
+                fseek(file, -1, SEEK_CUR);
+                update(context->chunk, context->chunk_size, context->hash);
             }
         }
 
