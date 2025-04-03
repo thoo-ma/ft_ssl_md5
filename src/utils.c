@@ -8,43 +8,30 @@ static void print_hash(ft_ssl_context_t * context) {
 
 void ft_ssl_print(ft_ssl_context_t * context, FILE * file) {
 
-    // When reading from stdin, flag -p disable flags -q and -r
     if (file == stdin && IS_OPTION_P(context->options)) {
         print_hash(context);
         printf("\n");
-        return;
-    }
-
-    if (IS_OPTION_Q(context->options)) {
+    } else if (IS_OPTION_Q(context->options)) {
         print_hash(context);
         printf("\n");
-        return;
-    }
-
-    if (IS_OPTION_R(context->options)) {
+    } else if (IS_OPTION_R(context->options)) {
         print_hash(context);
-        if (context->p_message)
-            printf(" \"%s\"\n", context->p_message);
-        else
-            printf(" *%s\n", context->filename ? context->filename : "stdin");
-        return;
-    }
-
-    if (context->filename) {
-        printf("%s(%s)= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name, context->filename);
-    } else if (IS_OPTION_S(context->options) && file != stdin) {
-        printf("%s(\"%s\")= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name, context->p_message);
-    } else if (IS_OPTION_P(context->options)) {
-        if (context->p_message) {
-            printf("(\"%s\")= ", context->p_message);
-        }
-        // Don't print anything here as the (stdin)= part is already printed by process_input
+        context->p_message
+        ? printf(" \"%s\"\n", context->p_message)
+        : printf(" *%s\n", context->filename ? context->filename : "stdin");
     } else {
-        printf("%s(stdin)= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name);
+        if (context->filename) {
+            printf("%s(%s)= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name, context->filename);
+        } else if (IS_OPTION_S(context->options) && file != stdin) {
+            printf("%s(\"%s\")= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name, context->p_message);
+        } else if (IS_OPTION_P(context->options) && context->p_message) {
+            printf("(\"%s\")= ", context->p_message);
+        } else {
+            printf("%s(stdin)= ", ((ft_ssl_algorithm_t *)context->entry.data)->upper_name);
+        }
+        print_hash(context);
+        printf("\n");
     }
-
-    print_hash(context);
-    printf("\n");
 }
 
 void process_input(ft_ssl_context_t * context, FILE * file, void (*pad)(uint8_t *, size_t *, size_t), void (*update)(uint8_t *, size_t, uint32_t *)) {
