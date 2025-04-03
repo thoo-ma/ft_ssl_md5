@@ -15,16 +15,8 @@
 static const ft_ssl_algorithm_t algorithms[] = {
     {"md5", "MD5", 4, md5},
     {"sha256", "SHA256", 8, sha256},
-    {NULL, NULL, 0, NULL}};
-
-static void __attribute__((unused)) print_context(ft_ssl_context_t * context) {
-    printf("hash type: %s\n", ((ft_ssl_algorithm_t *)context->entry.data)->lower_name);
-    printf("options: %d\n", context->options);
-    printf("filename: %s\n", context->filename);
-    printf("message size: %ld\n", context->message_size);
-    printf("chunk size: %ld\n", context->chunk_size);
-    printf("chunk: %s\n", (char *)context->chunk);
-}
+    {NULL, NULL, 0, NULL}
+};
 
 static void print_usage(const char * prog_name) {
     fprintf(stderr, "Usage: %s [md5|sha256] [-p] [-q] [-r] [-s string] [file...]\n", prog_name);
