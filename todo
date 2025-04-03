@@ -1,3 +1,0 @@
-perfs:
-- inline functions
-- unroll round loops (cf. rfc)
