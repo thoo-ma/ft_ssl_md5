@@ -17,18 +17,25 @@ static void md5_pad(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, size_t
 
     // Add the '1' bit
     chunk[*chunk_size] = 0x80;
+    (*chunk_size)++;
 
-    // Append '0' bits to the last 512 bits block of the chunk
-    size_t block_index = (*chunk_size + 1) / 64;
-    size_t zeros = 64 * (block_index + 1) - *chunk_size - 1 - 8;
+    // Calculate space needed for padding
+    // We need at least 8 bytes for the message length at the end
+    size_t padding_needed = 64 - (*chunk_size % 64);
+    if (padding_needed < 8)
+        padding_needed += 64;  // Need another block
+    
+    // Subtract 8 bytes that will be used for message length
+    padding_needed -= 8;
 
-    memset(chunk + *chunk_size + 1, 0, zeros);
+    // Append '0' bits 
+    memset(chunk + *chunk_size, 0, padding_needed);
+    *chunk_size += padding_needed;
 
     // Append the original size in bits (little-endian)
     size_t bit_size = message_size * 8;
-    memcpy(chunk + *chunk_size + 1 + zeros, &bit_size, 8);
-
-    *chunk_size = 64 * (block_index + 1);
+    memcpy(chunk + *chunk_size, &bit_size, 8);
+    *chunk_size += 8;
 }
 
 /// @brief Reverse the byte order of each 32-bit word in the hash.

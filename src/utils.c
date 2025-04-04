@@ -51,15 +51,30 @@ void process_input(ft_ssl_context_t * context, FILE * file, void (*pad)(uint8_t 
             write(1, context->chunk, read_bytes);
         
         // Apply padding if this is the final chunk
-        if (read_bytes < CHUNK_SIZE_READ || (file != stdin && feof(file))) {
+        if (read_bytes < CHUNK_SIZE_READ) {
             pad(context->chunk, &context->chunk_size, context->message_size);
             padding_done = true;
+            update(context->chunk, context->chunk_size, context->hash);
+        } else {
+            // Process full chunks without padding
+            update(context->chunk, read_bytes, context->hash);
+            
+            // Check if we've reached EOF
+            int c = fgetc(file);
+            if (c == EOF) {
+                // Reset chunk for padding
+                context->chunk_size = 0;
+                pad(context->chunk, &context->chunk_size, context->message_size);
+                padding_done = true;
+                update(context->chunk, context->chunk_size, context->hash);
+            } else {
+                // Put the character back
+                ungetc(c, file);
+            }
         }
-        
-        update(context->chunk, context->chunk_size, context->hash);
     }
 
-    // Handle empty files or final padding for files where we didn't hit EOF
+    // Handle empty files or final padding for files where we didn't hit EOF within the read
     if (!padding_done) {
         context->chunk_size = 0;
         pad(context->chunk, &context->chunk_size, context->message_size);
