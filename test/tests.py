@@ -19,10 +19,21 @@ TEST_FILES = [
 ]
 
 
+ALGORITHM_DISPLAY_NAMES = {
+    "md5": "MD5",
+    "sha256": "SHA2-256"
+}
+
+
 class FtSslTester:
+
     def __init__(self, algorithm: str):
         self.algorithm = algorithm
         self.ft_ssl_path = "../ft_ssl"
+
+    def get_algorithm_display_name(self) -> str:
+        """Return the display name for the current algorithm."""
+        return ALGORITHM_DISPLAY_NAMES.get(self.algorithm, self.algorithm.upper())
 
     def run_command(self, command: str) -> str:
         """Run a shell command and return the output."""
@@ -89,7 +100,8 @@ class TestSubjectCases:
     def test_stdin_basic(self, tester: FtSslTester):
         """Test basic stdin input."""
         hash_foo = tester.get_hash("foo")
-        expected = f"{tester.algorithm.upper()}(stdin)= {hash_foo}"
+        algorithm_name = tester.get_algorithm_display_name()
+        expected = f"{algorithm_name}(stdin)= {hash_foo}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm}")
         assert actual == expected, "Basic stdin test failed"
 
@@ -110,7 +122,8 @@ class TestSubjectCases:
     def test_file_basic(self, tester: FtSslTester, test_file):
         """Test basic file input."""
         hash_bar = tester.get_hash("bar")
-        expected = f"{tester.algorithm.upper()}(file)= {hash_bar}"
+        algorithm_name = tester.get_algorithm_display_name()
+        expected = f"{algorithm_name}(file)= {hash_bar}"
         actual = tester.run_command(f"{tester.ft_ssl_path} {tester.algorithm} file")
         assert actual == expected, "Basic file test failed"
 
@@ -124,7 +137,9 @@ class TestSubjectCases:
     def test_s_option(self, tester: FtSslTester):
         """Test -s option."""
         hash_foo = tester.get_hash("foo")
-        expected = f"{tester.algorithm.upper()}(\"foo\")= {hash_foo}"
+        algorithm_name = tester.get_algorithm_display_name()
+
+        expected = f"{algorithm_name}(\"foo\")= {hash_foo}"
 
         # NOTE: When running with pytest, the program receives an empty stdin input
         # that it processes before handling the -s option, resulting in two lines of output:
@@ -140,7 +155,8 @@ class TestSubjectCases:
     def test_stdin_with_file(self, tester: FtSslTester, test_file):
         """Test stdin with file input."""
         hash_bar = tester.get_hash("bar")
-        expected = f"{tester.algorithm.upper()}(file)= {hash_bar}"
+        algorithm_name = tester.get_algorithm_display_name()
+        expected = f"{algorithm_name}(file)= {hash_bar}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} file")
         assert actual == expected, "stdin with file test failed"
 
@@ -148,7 +164,8 @@ class TestSubjectCases:
         """Test -p option with file."""
         hash_foo = tester.get_hash("foo")
         hash_bar = tester.get_hash("bar")
-        expected = f"(\"foo\")= {hash_foo}\n{tester.algorithm.upper()}(file)= {hash_bar}"
+        algorithm_name = tester.get_algorithm_display_name()
+        expected = f"(\"foo\")= {hash_foo}\n{algorithm_name}(file)= {hash_bar}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} -p file")
         assert actual == expected, "p option with file test failed"
 
@@ -164,7 +181,8 @@ class TestSubjectCases:
         """Test -p -s options with file."""
         hash_foo = tester.get_hash("foo")
         hash_bar = tester.get_hash("bar")
-        expected = f"(\"foo\")= {hash_foo}\n{tester.algorithm.upper()}(\"foo\")= {hash_foo}\n{tester.algorithm.upper()}(file)= {hash_bar}"
+        algorithm_name = tester.get_algorithm_display_name()
+        expected = f"(\"foo\")= {hash_foo}\n{algorithm_name}(\"foo\")= {hash_foo}\n{algorithm_name}(file)= {hash_bar}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} -p -s foo file")
         assert actual == expected, "p and s options with file test failed"
 
