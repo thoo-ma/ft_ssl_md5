@@ -3,6 +3,12 @@
     "build": {
         "dockerfile": "Dockerfile"
     },
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh/id_rsa,target=/root/.ssh/id_rsa,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.ssh/id_rsa.pub,target=/root/.ssh/id_rsa.pub,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.ssh/known_hosts,target=/root/.ssh/known_hosts,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.ssh/config,target=/root/.ssh/config,type=bind,consistency=cached"
+    ],
     "customizations": {
         "vscode": {
             "extensions": [
