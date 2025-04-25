@@ -5,3 +5,4 @@ ft_ssl
 .venv/
 __pycache__/
 .pytest_cache/
+test/input/fuzz/

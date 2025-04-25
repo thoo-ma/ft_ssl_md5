@@ -1,4 +1,5 @@
 import pytest
+from tests import FtSslTester
 
 
 def pytest_addoption(parser):
@@ -19,3 +20,9 @@ def pytest_generate_tests(metafunc):
         algorithm = metafunc.config.getoption("algorithm")
         # Override the existing parameterization with our command line value
         metafunc.parametrize("tester", [algorithm], indirect=True)
+
+
+@pytest.fixture
+def tester(request):
+    """Return a tester instance with the specified algorithm."""
+    return FtSslTester(request.param)

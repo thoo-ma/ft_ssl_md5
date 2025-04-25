@@ -46,12 +46,6 @@ class FtSslTester:
 
 
 @pytest.fixture
-def tester(request):
-    """Return a tester instance with the specified algorithm."""
-    return FtSslTester(request.param)
-
-
-@pytest.fixture
 def test_file():
     """Create a test file with 'bar' content and clean up afterward."""
     with open("file", "w") as f:
