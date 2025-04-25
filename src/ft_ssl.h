@@ -35,7 +35,7 @@
 #define CHUNK_SIZE_READ (BLOCK_SIZE * CHUNK_NUMBERS)
 
 /// @brief The total number of 512 bits blocks in a chunk (one extra for padding)
-#define CHUNK_SIZE_TOTAL (CHUNK_SIZE_READ + BLOCK_SIZE)
+#define CHUNK_SIZE_TOTAL (CHUNK_SIZE_READ + 2 * BLOCK_SIZE)
 
 /// @brief Context for ft_ssl operations
 typedef struct {

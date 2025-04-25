@@ -21,19 +21,34 @@ static void sha256_pad(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t * chunk_size, siz
 
     // Append the bit '1' to the message
     chunk[*chunk_size] = 0x80;
+    (*chunk_size)++;
 
-    // Append '0' bits to the last 512 bits block of the chunk
-    size_t block_index = (*chunk_size + 1) / 64;
-    size_t zeros = 64 * (block_index + 1) - *chunk_size - 1 - 8;
+    // Calculate padding zeros
+    // We need to pad until the total length is congruent to 56 (mod 64)
+    // which leaves 8 bytes (64 bits) for the original length.
+    size_t current_mod_64 = *chunk_size % 64;
+    size_t zeros_to_add;
 
-    memset(chunk + *chunk_size + 1, 0, zeros);
+    if (current_mod_64 <= 56) {
+        // Enough space in the current block for the length
+        zeros_to_add = 56 - current_mod_64;
+    } else {
+        // Not enough space, need to pad to the end of this block,
+        // and then add 56 zeros in the next block.
+        zeros_to_add = (64 - current_mod_64) + 56;
+    }
 
-    // Append the original size in bits (big-endian)
-    size_t bit_size = message_size * 8;
+    // Add the zero padding
+    memset(chunk + *chunk_size, 0, zeros_to_add);
+    *chunk_size += zeros_to_add;
+
+    // Append the original message size in bits (big-endian)
+    uint64_t bit_size = message_size * 8;
     for (size_t i = 0; i < 8; i++)
-        chunk[*chunk_size + 1 + zeros + i] = (bit_size >> (56 - 8 * i)) & 0xFF;
+        chunk[*chunk_size + i] = (uint8_t)(bit_size >> (56 - 8 * i));
+    *chunk_size += 8;
 
-    *chunk_size = 64 * (block_index + 1);
+    // *chunk_size is now the total size of the padded message, a multiple of 64.
 }
 
 static void sha256_update(uint8_t chunk[CHUNK_SIZE_TOTAL], size_t chunk_size, uint32_t hash[8]) {
