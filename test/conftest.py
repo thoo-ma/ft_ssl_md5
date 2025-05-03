@@ -1,5 +1,5 @@
 import pytest
-from tests import FtSslTester
+from tester import FtSslTester
 
 
 def pytest_addoption(parser):
@@ -24,5 +24,15 @@ def pytest_generate_tests(metafunc):
 
 @pytest.fixture
 def tester(request):
-    """Return a tester instance with the specified algorithm."""
+    """Return a unified tester instance with the specified algorithm."""
     return FtSslTester(request.param)
+
+
+@pytest.fixture
+def test_file(tester):
+    """Create a test file with 'bar' content and clean up afterward."""
+    file_path = tester.create_test_file("file", "bar")
+    yield "file"
+    import os
+    if os.path.exists("file"):
+        os.remove("file")

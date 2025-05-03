@@ -1,48 +1,7 @@
 import os
-import sys
-import subprocess
+# import sys
 import pytest
-
-
-TEST_FILES = [
-    "./input/0.txt",
-    "./input/1.txt",
-    "./input/63.txt",
-    "./input/64.txt",
-    "./input/65.txt",
-    "./input/639.txt",
-    "./input/640.txt",
-    "./input/641.txt",
-    "./input/6399.txt",
-    "./input/6400.txt",
-    "./input/6401.txt",
-]
-
-
-ALGORITHM_DISPLAY_NAMES = {
-    "md5": "MD5",
-    "sha256": "SHA2-256"
-}
-
-
-class FtSslTester:
-
-    def __init__(self, algorithm: str):
-        self.algorithm = algorithm
-        self.ft_ssl_path = "../ft_ssl"
-
-    def get_algorithm_display_name(self) -> str:
-        """Return the display name for the current algorithm."""
-        return ALGORITHM_DISPLAY_NAMES.get(self.algorithm, self.algorithm.upper())
-
-    def run_command(self, command: str) -> str:
-        """Run a shell command and return the output."""
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        return result.stdout.strip()
-
-    def get_hash(self, input_str: str) -> str:
-        """Get hash of an input string using openssl."""
-        return self.run_command(f"echo -n {input_str} | openssl {self.algorithm} | cut -d ' ' -f2")
+from tester import FtSslTester
 
 
 @pytest.fixture
@@ -55,38 +14,8 @@ def test_file():
         os.remove("file")
 
 
-class TestComparisonWithOpenSSL:
-    
-    @pytest.mark.parametrize("filename", TEST_FILES)
-    def test_file_input(self, tester: FtSslTester, filename: str):
-        """Test file input mode."""
-        openssl_output = tester.run_command(f"openssl {tester.algorithm} {filename}")
-        ft_ssl_output = tester.run_command(f"{tester.ft_ssl_path} {tester.algorithm} {filename}")
-        assert ft_ssl_output == openssl_output, f"File input test failed for {filename}"
-    
-    @pytest.mark.parametrize("filename", TEST_FILES)
-    def test_stdin_input(self, tester: FtSslTester, filename: str):
-        """Test stdin input mode."""
-        openssl_output = tester.run_command(f"cat {filename} | openssl {tester.algorithm}")
-        ft_ssl_output = tester.run_command(f"cat {filename} | {tester.ft_ssl_path} {tester.algorithm}")
-        assert ft_ssl_output == openssl_output, f"Stdin input test failed for {filename}"
-    
-    @pytest.mark.parametrize("filename", TEST_FILES)
-    def test_r_option(self, tester: FtSslTester, filename: str):
-        """Test -r option."""
-        openssl_output = tester.run_command(f"openssl {tester.algorithm} -r {filename}")
-        ft_ssl_output = tester.run_command(f"{tester.ft_ssl_path} {tester.algorithm} -r {filename}")
-        assert ft_ssl_output == openssl_output, f"r option test failed for {filename}"
-
-    def test_multiple_files(self, tester: FtSslTester):
-        """Test multiple files input."""
-        files = " ".join(TEST_FILES)
-        openssl_output = tester.run_command(f"openssl {tester.algorithm} {files}")
-        ft_ssl_output = tester.run_command(f"{tester.ft_ssl_path} {tester.algorithm} {files}")
-        assert ft_ssl_output == openssl_output, "Multiple files test failed"
-
-
 class TestSubjectCases:
+    """Tests that verify the output format matches the subject requirements."""
     
     # NOTE: We're testing against "{algorithm.upper()}(stdin)=" format rather than
     # just "(stdin)=" (which is mentioned in the subject) to match the format
@@ -181,9 +110,9 @@ class TestSubjectCases:
         assert actual == expected, "p and s options with file test failed"
 
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python tests.py <algorithm>")
-        sys.exit(1)
-    algorithm = sys.argv[1]
-    pytest.main(["-v", f"--algorithm={algorithm}"])
+# if __name__ == "__main__":
+#     if len(sys.argv) < 2:
+#         print("Usage: python test_subject.py <algorithm>")
+#         sys.exit(1)
+#     algorithm = sys.argv[1]
+#     pytest.main(["-v", f"--algorithm={algorithm}"])
