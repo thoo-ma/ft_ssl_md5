@@ -21,7 +21,7 @@ class TestSubjectCases:
     # of the openssl version installed on school computers.
     def test_stdin_basic(self, tester: FtSslTester):
         """Test basic stdin input."""
-        hash_foo = tester.get_hash("foo")
+        hash_foo = tester.get_openssl_hash("foo")
         algorithm_name = tester.get_algorithm_display_name()
         expected = f"{algorithm_name}(stdin)= {hash_foo}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm}")
@@ -29,21 +29,21 @@ class TestSubjectCases:
 
     def test_stdin_p_option(self, tester: FtSslTester):
         """Test -p option with stdin."""
-        hash_foo = tester.get_hash("foo")
+        hash_foo = tester.get_openssl_hash("foo")
         expected = f"(\"foo\")= {hash_foo}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} -p")
         assert actual == expected, "p option with stdin test failed"
 
     def test_stdin_qr_options(self, tester: FtSslTester):
         """Test -q -r options with stdin."""
-        hash_foo = tester.get_hash("foo")
+        hash_foo = tester.get_openssl_hash("foo")
         expected = hash_foo
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} -q -r")
         assert actual == expected, "q and r options with stdin test failed"
 
     def test_file_basic(self, tester: FtSslTester, test_file):
         """Test basic file input."""
-        hash_bar = tester.get_hash("bar")
+        hash_bar = tester.get_openssl_hash("bar")
         algorithm_name = tester.get_algorithm_display_name()
         expected = f"{algorithm_name}(file)= {hash_bar}"
         actual = tester.run_command(f"{tester.ft_ssl_path} {tester.algorithm} file")
@@ -51,14 +51,14 @@ class TestSubjectCases:
 
     def test_file_r_option(self, tester: FtSslTester, test_file):
         """Test -r option with file."""
-        hash_bar = tester.get_hash("bar")
+        hash_bar = tester.get_openssl_hash("bar")
         expected = f"{hash_bar} *file"
         actual = tester.run_command(f"{tester.ft_ssl_path} {tester.algorithm} -r file")
         assert actual == expected, "r option with file test failed"
 
     def test_s_option(self, tester: FtSslTester):
         """Test -s option."""
-        hash_foo = tester.get_hash("foo")
+        hash_foo = tester.get_openssl_hash("foo")
         algorithm_name = tester.get_algorithm_display_name()
 
         expected = f"{algorithm_name}(\"foo\")= {hash_foo}"
@@ -76,7 +76,7 @@ class TestSubjectCases:
 
     def test_stdin_with_file(self, tester: FtSslTester, test_file):
         """Test stdin with file input."""
-        hash_bar = tester.get_hash("bar")
+        hash_bar = tester.get_openssl_hash("bar")
         algorithm_name = tester.get_algorithm_display_name()
         expected = f"{algorithm_name}(file)= {hash_bar}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} file")
@@ -84,8 +84,8 @@ class TestSubjectCases:
 
     def test_p_option_with_file(self, tester: FtSslTester, test_file):
         """Test -p option with file."""
-        hash_foo = tester.get_hash("foo")
-        hash_bar = tester.get_hash("bar")
+        hash_foo = tester.get_openssl_hash("foo")
+        hash_bar = tester.get_openssl_hash("bar")
         algorithm_name = tester.get_algorithm_display_name()
         expected = f"(\"foo\")= {hash_foo}\n{algorithm_name}(file)= {hash_bar}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} -p file")
@@ -93,16 +93,16 @@ class TestSubjectCases:
 
     def test_p_r_options_with_file(self, tester: FtSslTester, test_file):
         """Test -p -r options with file."""
-        hash_foo = tester.get_hash("foo")
-        hash_bar = tester.get_hash("bar")
+        hash_foo = tester.get_openssl_hash("foo")
+        hash_bar = tester.get_openssl_hash("bar")
         expected = f"(\"foo\")= {hash_foo}\n{hash_bar} *file"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} -p -r file")
         assert actual == expected, "p and r options with file test failed"
 
     def test_p_s_options_with_file(self, tester: FtSslTester, test_file):
         """Test -p -s options with file."""
-        hash_foo = tester.get_hash("foo")
-        hash_bar = tester.get_hash("bar")
+        hash_foo = tester.get_openssl_hash("foo")
+        hash_bar = tester.get_openssl_hash("bar")
         algorithm_name = tester.get_algorithm_display_name()
         expected = f"(\"foo\")= {hash_foo}\n{algorithm_name}(\"foo\")= {hash_foo}\n{algorithm_name}(file)= {hash_bar}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} -p -s foo file")

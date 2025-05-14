@@ -43,7 +43,7 @@ class FtSslTester:
         except subprocess.TimeoutExpired:
             return -1, "", "Timeout" if not capture_text else ""
     
-    def get_hash(self, input_str: str) -> str:
+    def get_openssl_hash(self, input_str: str) -> str:
         """Get hash of an input string using openssl."""
         return self.run_command(f"echo -n {input_str} | openssl {self.algorithm} | cut -d ' ' -f2")
     
