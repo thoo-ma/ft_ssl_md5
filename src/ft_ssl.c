@@ -14,7 +14,7 @@
 
 static const ft_ssl_algorithm_t ft_ssl_algorithms[] = {
     {"md5", "MD5", 4, md5},
-    {"sha256", "SHA2-256", 8, sha256},
+    {"sha256", "SHA256", 8, sha256},
     {NULL, NULL, 0, NULL}
 };
 

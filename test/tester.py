@@ -10,7 +10,7 @@ from typing import List, Tuple, Dict, Any
 
 ALGORITHM_DISPLAY_NAMES = {
     "md5": "MD5",
-    "sha256": "SHA2-256"
+    "sha256": "SHA256"
 }
 
 
