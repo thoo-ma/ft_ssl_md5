@@ -89,10 +89,10 @@ test_fuzzing: test_fuzzing_md5 test_fuzzing_sha256
 
 # Benchmark tests
 test_benchmark_md5: all venv
-	@cd test && .venv/bin/python -m pytest -v benchmark.py --algorithm=md5
+	@cd test && .venv/bin/python -m pytest -v benchmark.py --algorithm=md5 -s
 
 test_benchmark_sha256: all venv
-	@cd test && .venv/bin/python -m pytest -v benchmark.py --algorithm=sha256
+	@cd test && .venv/bin/python -m pytest -v benchmark.py --algorithm=sha256 -s
 
 test_benchmark: test_benchmark_md5 test_benchmark_sha256
 
