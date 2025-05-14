@@ -36,7 +36,7 @@ void ft_ssl_print(ft_ssl_context_t * context, FILE * file) {
 
 void process_input(ft_ssl_context_t * context, FILE * file, void (*pad)(uint8_t *, size_t *, size_t), void (*update)(uint8_t *, size_t, uint32_t *)) {
 
-    if (file == stdin && IS_OPTION_P(context->options))
+    if (file == stdin && IS_OPTION_P(context->options) && !IS_OPTION_Q(context->options))
         write(1, "(\"", 2);
 
     size_t read_bytes = 0;
@@ -81,6 +81,6 @@ void process_input(ft_ssl_context_t * context, FILE * file, void (*pad)(uint8_t 
         update(context->chunk, context->chunk_size, context->hash);
     }
 
-    if (file == stdin && IS_OPTION_P(context->options))
+    if (file == stdin && IS_OPTION_P(context->options) && !IS_OPTION_Q(context->options))
         write(1, "\")= ", 4);
 }
