@@ -40,6 +40,13 @@ class TestSubjectCases:
         expected = hash_foo
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} -q -r")
         assert actual == expected, "q and r options with stdin test failed"
+    
+    def test_stdin_qp_options(self, tester: FtSslTester):
+        """Test -q -p options with stdin."""
+        hash_foo = tester.get_openssl_hash("foo")
+        expected = f"foo{hash_foo}"
+        actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} -q -p")
+        assert actual == expected, "q and p options with stdin test failed"
 
     def test_file_basic(self, tester: FtSslTester, test_file):
         """Test basic file input."""
