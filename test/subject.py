@@ -1,5 +1,4 @@
 import os
-# import sys
 import pytest
 from tester import FtSslTester
 
@@ -108,11 +107,3 @@ class TestSubjectCases:
         expected = f"(\"foo\")= {hash_foo}\n{algorithm_name}(\"foo\")= {hash_foo}\n{algorithm_name}(file)= {hash_bar}"
         actual = tester.run_command(f"echo -n foo | {tester.ft_ssl_path} {tester.algorithm} -p -s foo file")
         assert actual == expected, "p and s options with file test failed"
-
-
-# if __name__ == "__main__":
-#     if len(sys.argv) < 2:
-#         print("Usage: python test_subject.py <algorithm>")
-#         sys.exit(1)
-#     algorithm = sys.argv[1]
-#     pytest.main(["-v", f"--algorithm={algorithm}"])

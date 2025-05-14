@@ -1,5 +1,4 @@
 import os
-# import sys
 import pytest
 from tester import FtSslTester
 
@@ -276,11 +275,3 @@ class TestFuzzing:
                 for f in failures
             ])
             pytest.fail(f"Found {len(failures)} verification failures:\n{failure_details}")
-
-
-# if __name__ == "__main__":
-#     if len(sys.argv) < 2:
-#         print("Usage: python test_fuzzing.py <algorithm>")
-#         sys.exit(1)
-#     algorithm = sys.argv[1]
-#     pytest.main(["-v", f"--algorithm={algorithm}"])

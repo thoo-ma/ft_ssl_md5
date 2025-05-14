@@ -1,6 +1,5 @@
 import os
 import time
-import pytest
 from tester import FtSslTester
 
 
